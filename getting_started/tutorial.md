@@ -22,4 +22,36 @@ Wagtail提供了与`django-admin.py startproject` 类似的 `start` 命令。在
 + 一些基础模板
 + 一个简单的“搜索”应用。
 
-3. 
+3. 安装项目依赖
+
+```sh
+$ pip install -r requirements.txt
+```
+
+此步骤确保刚创建的项目具有相关版本的Django
+
+4. 创建数据库
+
+```sh
+$ ./manage.py migrate
+```
+
+在没有更新项目设置时，数据库将是项目目录中的一个 SQLite 数据库文件。
+
+5. 创建出一个管理员用户
+
+```sh
+$ ./manage.py createsuperuser
+```
+
+6. 启动服务器
+
+```sh
+$ ./manage.py runserver
+```
+
+如没有什么错误的话，访问`http://127.0.0.1:8000`就可以看到一个欢迎页面了：
+
+![Wagtail欢迎页面](../images/tutorial_1.png)
+
+
