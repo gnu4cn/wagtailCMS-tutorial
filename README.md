@@ -6,6 +6,8 @@
 + [TypeScript 手册](https://ts.xfoss.com/)，一本TypeScript的入门书籍，翻译自 TypeScript官方网站
 
 
+你可以在 https://github.com/gnu4cn/wagtailCMS-tutorial 对本项目进行 fork, 并提交你的修正。
+
 Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放源代码内容管理系统。
 
 本教程由以下章节构成，希望在学习这些内容后，能对其有全面掌握与切实使用。
