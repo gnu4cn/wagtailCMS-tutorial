@@ -52,11 +52,11 @@ $ ./manage.py runserver
 
 如没有什么错误的话，访问 [http://127.0.0.1:8000]() 就可以看到一个欢迎页面了：
 
-![Wagtail欢迎页面](../images/tutorial_1.png)
+![Wagtail欢迎页面](images/tutorial_1.png)
 
 可在 [http://127.0.0.1:8000/admin]() 处访问到管理区
 
-![Wagtail管理区](../images/tutorial_2.png)
+![Wagtail管理区](images/tutorial_2.png)
 
 ## 对`HomePage`模块进行扩展
 
@@ -103,7 +103,7 @@ class HomePage(Page):
 {% endblock %}
 ```
 
-![修改了模型与模板后的Wagtail主页](../images/tutorial_3.png)
+![修改了模型与模板后的Wagtail主页](images/tutorial_3.png)
 
 
 ## 关于 Wagtail 模板的标签
@@ -245,18 +245,18 @@ class BlogPage(Page):
 
 现在创建一些作为`BlogIndexPage`的子页面的博客文章出来。在建立这些博客文章是一定要选择`Blog Page`类型。
 
-![创建一个类型为BlogPage的博客文章页面](../images/tutorial_4a.png)
+![创建一个类型为BlogPage的博客文章页面](images/tutorial_4a.png)
 
 
-![创建一个类型为BlogPage的博客文章页面](../images/tutorial_4b.png)
+![创建一个类型为BlogPage的博客文章页面](images/tutorial_4b.png)
 
 Wagtail将给予你对不同父内容类型下，可建立何种内容的完全掌控的能力（Wagtail gives you full control over what kinds of content can be created under various parent content types）。默认所有页面类型，都可以是任意其他页面类型的子页面。
 
-![创建一个类型为BlogPage的博客文章页面](../images/tutorial_5.png)
+![创建一个类型为BlogPage的博客文章页面](images/tutorial_5.png)
 
 此时就有了一个可初步工作的博客系统了。在`/blog`URL处访问该博客，将看到如下页面：
 
-![一个初步工作的Wagtail博客系统](../images/tutorial_7.png)
+![一个初步工作的Wagtail博客系统](images/tutorial_7.png)
 
 文章标题应是链接到文章页面的，同时在每个文章页面的底部，都应有一个返回到博客主页的链接。
 
@@ -453,7 +453,7 @@ class BlogPageGalleryImage(Orderable):
 
 这里使用 `{% image %}` 标签（此标签存在于`wagtailimages_tags`库中，在该模板顶部有导入该库），来将某个`<img>`元素，以`file-320x240`为参数而表明该图片需要缩放及裁剪，以填充到一个`320x240`的矩形中，而进行插入。有关在模板中图片的使用的更多信息，请参阅[文档](topics/images.md)。
 
-![插入了图片集的博客文章页面](../images/tutorial_6.jpg)
+![插入了图片集的博客文章页面](images/tutorial_6.jpg)
 
 因为这里的图片集图片，都是有着其自身地位的数据库对象，所以可以对其进行查询以及独立于博客文章主体的重复使用（since our gallery images are database objects in their own right, we can query and re-use them independently of the blog post body）。下面定义了一个`main_image`方法，将返回图片集的第一个条目（或在没有没有图片集时返回`None`）：
 
