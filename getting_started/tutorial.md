@@ -453,7 +453,7 @@ class BlogPageGalleryImage(Orderable):
 
 这里使用 `{% image %}` 标签（此标签存在于`wagtailimages_tags`库中，在该模板顶部有导入该库），来将某个`<img>`元素，以`file-320x240`为参数而表明该图片需要缩放及裁剪，以填充到一个`320x240`的矩形中，而进行插入。有关在模板中图片的使用的更多信息，请参阅[文档](topics/images.md)。
 
-![插入了图片集的博客文章页面](../images/tutorial_6.png)
+![插入了图片集的博客文章页面](../images/tutorial_6.jpg)
 
 因为这里的图片集图片，都是有着其自身地位的数据库对象，所以可以对其进行查询以及独立于博客文章主体的重复使用（since our gallery images are database objects in their own right, we can query and re-use them independently of the blog post body）。下面定义了一个`main_image`方法，将返回图片集的第一个条目（或在没有没有图片集时返回`None`）：
 
