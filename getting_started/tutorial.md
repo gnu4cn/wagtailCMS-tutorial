@@ -512,4 +512,114 @@ class BlogPage(Page):
 {% endblock %}
 ```
 
+## 将文章打上标签
+
+**Tagging Posts**
+
+现在要加入一项可以让文章编辑给他们的文章“打上标签”的功能，如此读者就可以查看到比如“自行车”相关的所有内容。要实现次特性，就需要调用与Wagtail打包在一起的标签系统（the tagging system bundled with Wagtail），将该标签系统附加到模型`BlogPage`与内容面板，并在博客文章模板上渲染出带有链接的标签。不言而喻，这里同样需要一个能用的特定于标签URL视图（Of course, we'll need a working tag-specific URL view as well）。
+
+首先，再一次对`models.py`进行修改：
+
+```python
+from django.db import models
+
+# 新加入了 ParentalKey、Orderable、InlinePanel与ImageChooserPanel 的导入
+# 新加入了 ClusterTaggableManager、TaggedItemBase与MultiFieldPanel
+from modelcluster.fields import ParentalKey
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
+
+from wagtail.core.models import Page, Orderable
+from wagtail.core.fields import RichTextField
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, MultiFieldPanel
+from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.search import index
+
+# ...(保持BlogIndexPage的定义不变)
+class BlogIndexPage(Page):
+    intro = RichTextField(blank=True)
+
+    def get_context(self, request):
+        # 将上下文更新为仅包含发布了的博客文章，并以 时间逆序 进行排序
+        context = super().get_context(request)
+        blogpages = self.get_children().live().order_by('-first_published_at')
+        context['blogpages'] = blogpages
+        return context
+
+    content_panels = Page.content_panels + [
+        FieldPanel('intro', classname="full")
+    ]
+
+class BlogPageTag(TaggedItemBase):
+    content_object = ParentalKey(
+        'BlogPage',
+        related_name = 'tagged_items',
+        on_delete = models.CASCADE
+    )
+
+# 保留 BlogIndexPage的定义，并加入：
+
+class BlogPage(Page):
+    date = models.DateField("发布日期")
+    intro = models.CharField(max_length=250)
+    body = RichTextField(blank=True)
+    tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
+
+    # ... （保留 main_image 与 search_fields 的定义）
+    def main_image(self):
+        gallery_item = self.gallery_images.first()
+        if gallery_item:
+            return gallery_item.image
+        else:
+            return None
+
+    search_fields = Page.search_fields + [
+        index.SearchField('intro'),
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            FieldPanel('date'),
+            FieldPanel('tags'),
+        ], heading="文章信息"),
+        FieldPanel('intro'),
+        FieldPanel('body', classname="full"),
+        InlinePanel('gallery_images', label="图片"),
+    ]
+
+class BlogPageGalleryImage(Orderable):
+    page = ParentalKey(BlogPage, on_delete=models.CASCADE, related_name="gallery_images")
+    image = models.ForeignKey(
+        'wagtailimages.Image', on_delete=models.CASCADE, related_name="+"
+    )
+    caption = models.CharField(blank=True, max_length=250)
+
+    panels = [
+        ImageChooserPanel('image'),
+        FieldPanel('caption'),
+    ]
+```
+
+此时运行 `python manage.py makemigrations` 与 `python manage.py migrate`。
+
+请注意这里新的`modelcluster`与`taggit`导入，及新的`BlogPageTag`模型的加入，以及在`BlogPage`模型上加入的`tags`字段。这里还利用了`BlogPage`模型上`conent_panels`中的`MultiFieldPanel`，来把日期与标签字段放在一起，从而提升了可读性。
+
+对`BlogPage`实例之一进行编辑，那么现在就可以对文章打标签了：
+
+![已经可以给文章打标签](images/tutorial_8.png)
+
+而要在`BlogPage`上渲染出标签，就要将下面的代码加入到`blog_page.html`：
+
+```html
+    {% if page.tags.all.count %}
+        <div class="tags">
+            <h3>标签：</h3>
+            {% for tag in page.tags.all %}
+                <a href="{% slugurl 'tags' %}?tag={{ tag }}"><button type="button">{{ tag }}</button></a>
+            {% endfor %}
+        </div>
+    {% endif %}
+```
+
 
