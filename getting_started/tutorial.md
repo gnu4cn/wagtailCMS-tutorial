@@ -264,4 +264,252 @@ Wagtail将给予你对不同父内容类型下，可建立何种内容的完全�
 
 **Parents and Children**
 
+在Wagtail中进行的大部分工作，都是围绕由众多节点与叶子所构成的“树”结构的层次概念开展的（参见[理论](reference/pages/theory.md)，Much of the work you'll be doing in Wagtail revolves around the concept of hierarchical "tree" structures consisting of nodes and leaves）。在本例中，`BlogIndexPage`是一个“节点”，同时单个的`BlogPage`实例，就是“叶子”了。
+
+这里再来从另一个角度看看`blog_index_page.html`的代码：
+
+```html
+{% for post in page.get_children %}
+    <h2><a href="{% pageurl post %}">{{ post.title }}</a></h2>
+    {{ post.specific.intro }}
+    {{ post.specific.body|richtext }}
+{% endfor %}
+```
+
+在Wagtail中的每个“页面”，都可以从他在这个层次体系中的位置，呼出他的父页面或所有子页面（Every "page" in Wagtail can call out to its parent or children from its own position in the hierarchy）。但这里又为何要指定`post.specific.into`，而不是`post.intro`呢？这就必须要从定义模型的方式说起了：
+
+```python
+class BlogPage(Page):
+```
+
+方法`get_children()`给出了一个`Page`基类的实例清单。而在打算引用这些继承了该基类的实例属性时，Wagtail提供了`specific`方法，来获取到真实的`BlogPage`记录（the `get_children()` method gets us a list of instances of the `Page` base class. When we want ot reference properties of the instances that inherit from the base class, Wagtail provides the `specific` method that retrieves the actual `BlogPage` record）。尽管`title`字段在基类`Page`模块上是存在的，但`intro`字段却只存在与`BlogPage`模型上，因此就需要`.specific`方法，来访问该字段。
+
+这里可使用Django的`with`标签，来讲模板代码加以优化：
+
+```html
+    {% for post in page.get_children %}
+        {% with post=post.specific %}
+            <h2><a href="{% pageurl post %}">{{ post.title }}</a></h2>
+            {{ post.intro }}
+            {{ post.body|richtext }}
+        {% endwith %}
+    {% endfor %}
+```
+
+在后期编写更为定制化的Wagtail代码时，将发现一整套的`QuerySet`修饰符（a whole set of QuerySet modifiers），来帮助对层次结构进行导航。
+
+```python
+# 给定一个页面对象`somepage`:
+MyModel.objects.descendant_of(somepage)
+child_of(somepage) / not_child_of(somepage)
+ancestor_of(somepage) / not_ancestor_of(somepage)
+parent_of(somepage) / not_parent_of(somepage)
+sibling_of(somepage) / not_sibling_of(somepage)
+
+# ... and ...
+somepage.get_children()
+somepage.get_ancestors()
+somepage.get_descenants()
+somepage.get_siblings()
+```
+
+有关此方面的更多信息，请参阅：[页面的QuerySet参考](reference/pages/queryset_reference.md)
+
+
+## 覆写上下文
+
+**Overriding Context**
+
+在上面的博客首页视图中存在一些问题：
+
+1. 博客应该以 *相反* 的时间顺序显示的
+2. 要确保只显示那些已发布的内容
+
+要实现这两个目的，就要不光是在模板中抓取博客目录页面的子页面了。而要对模型定义中的`QuerySet`进行修改。Wagtail通过覆写`get_context()`方法，而令到这一点成为可能。像下面这样修改`BlogIndexPage`模型：
+
+```python
+class BlogIndexPage(Page):
+    intro = RichTextField(blank=True)
+
+    def get_context(self, request):
+        # 将上下文更新为仅包含发布了的博客文章，并以 时间逆序 进行排序
+        context = super().get_context(request)
+        blogpages = self.get_children().live().order_by('-first_publised_at')
+        context['blogpages'] = blogpages
+        return context
+```
+
+这里所完成的所有工作，就是先获取原始上下文，然后创建一个定制的`QuerySet`，将其加入到获取的上下文中，最后将修改后的上下文返回给视图。为此还需要对`blog_index_page.html`模板稍作改变。做以下修改：
+
+将 `{% for post in page.get_children %}` 修改为：`{% for post in blogpages %}`
+
+现在尝试加入一篇未发布的文章 -- 他将不会在博客目录页面出现。同时原有的文章将一最近发布在前的方式进行排序了。
+
+## 图片
+
+下面将把图片集附加到博客文章这一功能加入进来。尽管可以通过简单地将图片插入到`body`富文本字段中，但通过将图片集作为一种新的专用对象类型，在数据库中建立出来，然后有诸多优势 -- 以这种方式的话，就可以完全控制到这些图片在模板中的布局与样式，而不是必须在富文本字段中以特定方式对他们进行布置了。同时这样做也可以在独立于博客文本的其他地方，比如在博客目录页面显示一个缩略图的方式，使用这些图片。
+
+将一个新的`BlogPageGalleryImage`模型，加入到`models.py`文件中：
+
+```python
+from django.db import models
+
+# 新加入了 ParentalKey、Orderable、InlinePanel与ImageChooserPanel 的导入
+from modelcluster.fields import ParentalKey
+
+from wagtail.core.models import Page, Orderable
+from wagtail.core.fields import RichTextField
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.search import index
+
+class BlogIndexPage(Page):
+    intro = RichTextField(blank=True)
+
+    def get_context(self, request):
+        # 将上下文更新为仅包含发布了的博客文章，并以 时间逆序 进行排序
+        context = super().get_context(request)
+        blogpages = self.get_children().live().order_by('-first_published_at')
+        context['blogpages'] = blogpages
+        return context
+
+    content_panels = Page.content_panels + [
+        FieldPanel('intro', classname="full")
+    ]
+
+# 保留 BlogIndexPage的定义，并加入：
+
+class BlogPage(Page):
+    date = models.DateField("发布日期")
+    intro = models.CharField(max_length=250)
+    body = RichTextField(blank=True)
+
+    search_fields = Page.search_fields + [
+        index.SearchField('intro'),
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+        FieldPanel('date'),
+        FieldPanel('intro'),
+        FieldPanel('body', classname="full"),
+        InlinePanel('gallery_images', label="图片"),
+    ]
+
+class BlogPageGalleryImage(Orderable):
+    page = ParentalKey(BlogPage, on_delete=models.CASCADE, related_name="gallery_images")
+    image = models.ForeignKey(
+        'wagtailimages.Image', on_delete=models.CASCADE, related_name="+"
+    )
+    caption = models.CharField(blank=True, max_length=250)
+
+    panels = [
+        ImageChooserPanel('image'),
+        FieldPanel('caption'),
+    ]
+```
+
+此时运行 `python manage.py makemigrations` 与 `python manage.py migratte`。
+
+上面的代码中涉及到一些新的概念，下面就一起来看看他们：
+
+`BlogPageGalleryImage`模型继承自`Orderable`，从而将字段`sort_order`加入到模型中了，以对图片集中的图片顺序进行跟踪。
+
+到`BlogPage`模型的`ParentalKey`，则是将这些图片附加到某个特定页面。`ParentalKey`的工作方式与`ForeignKey`类似，不过同时将`BlogPageGalleryImage`定义为`BlogPage`模型的“子”模型，因此他就成为了页面的一个基础部分，可以对其进行修改提交与修订历史追踪等操作（A `ParentalKey` works similarly to a `ForeignKey`, but also defines `BlogPageGalleryImage` as a "child" of the `BlogPage` model, so that it's treated as a fundamental part of the page in operations like submitting for moderation, and tracking revision history）。
+
+`image`是到Wagtail内建的`Image`模型的一个`FoerignKey`, 图片本身是在`Image`模型中存储的。同时`Image`模型有着自己的专用面板类型（a dedicated panel type），`ImageChooserPanel`，该面板类型提供了一个用于选取某个既有图片或上传一个新图片的弹出界面。依此方式，就允许某个图片可以存在于多个图片集中 -- 从而有效地创建了一直页面与图片之间的多对多关系。
+
+在该外键上指定`on_delete=models.CASCADE`，就意味着当某个图片从系统中删除时，其所在图片集也会被删除。（但在某些情况下，可能让该条目留存下来更好 -- 比如在某个“our staff”页面包含了一个有着头像的人员清单，而其中一张头像被删除了，那么就宁愿将那个人在没有头像图片的情况下保留下来。在次情况下，就要把此外键设置为`blank=True, null=True, on_delete=models.SET_NULL`）。
+
+最后，将`InlinePanel`加入到`BlogPage.content_panels`中，从而领导该图片集在`BlogPage`的编辑界面上可用。
+
+对博客页面进行调整，以包含这些图片：
+
+```html
+{% extends "base.html" %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block body_class %}template-blogpage{% endblock %}
+
+{% block content %}
+    <h1>{{ page.title }}</h1>
+    <p class="meta">{{ page.date }}</p>
+
+    <div class="intro">{{ page.intro }}</div>
+
+    {{ page.body|richtext }}
+
+    {% for item in page.gallery_images.all %}
+        <div style="float: left; margin: 10px">
+            {% image item.image fill-320x240 %}
+            <p>{{ item.caption }}</p>
+        </div>
+    {% endfor %}
+
+    <p><a href="{{ page.get_parent.url }}">返回博客首页</a></p>
+{% endblock %}
+```
+
+这里使用 `{% image %}` 标签（此标签存在于`wagtailimages_tags`库中，在该模板顶部有导入该库），来将某个`<img>`元素，以`file-320x240`为参数而表明该图片需要缩放及裁剪，以填充到一个`320x240`的矩形中，而进行插入。有关在模板中图片的使用的更多信息，请参阅[文档](topics/images.md)。
+
+![插入了图片集的博客文章页面](../images/tutorial_6.png)
+
+因为这里的图片集图片，都是有着其自身地位的数据库对象，所以可以对其进行查询以及独立于博客文章主体的重复使用（since our gallery images are database objects in their own right, we can query and re-use them independently of the blog post body）。下面定义了一个`main_image`方法，将返回图片集的第一个条目（或在没有没有图片集时返回`None`）：
+
+```python
+class BlogPage(Page):
+    date = models.DateField("发布日期")
+    intro = models.CharField(max_length=250)
+    body = RichTextField(blank=True)
+
+    def main_image(self):
+        gallery_item = self.gallery_images.first()
+        if gallery_item:
+            return gallery_item.image
+        else:
+            return None
+
+    search_fields = Page.search_fields + [
+        index.SearchField('intro'),
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+        FieldPanel('date'),
+        FieldPanel('intro'),
+        FieldPanel('body', classname="full"),
+        InlinePanel('gallery_images', label="图片"),
+    ]
+```
+
+此方法现在已对模板可用了。现在对`blog_index_page.html`进行更新，以将博客文章主图作为每篇文章旁边的一个缩略图，而包含进来：
+
+```html
+{% extends "base.html" %}
+
+{% load wagtailcore_tags wagtailimages_tags %}
+
+{% block body_class %}template-blogindexpage{% endblock %}
+
+{% block content %}
+    <h1>{{ page.title }}</h1>
+    <div class="intro">{{ page.intro|richtext }}</div>
+
+    {% for post in blogpages %}
+        {% with post=post.specific %}
+            <h2><a href="{% pageurl post %}">{{ post.title }}</a></h2>
+
+            {% with post.main_image as main_image %}
+                {% if main_image %}
+                    {% image main_image fill-160x100 %}
+                {% endif %}
+            {% endwith %}
+
+            {{ post.intro }}
+        {% endwith %}
+    {% endfor %}
+{% endblock %}
+```
+
 
