@@ -1,5 +1,11 @@
 # Wagtail教程
 
+你可以直接在 xfoss.com 阅读本书：[wagtail.xfoss.com](https://wagtail.xfoss.com/)。xfoss.com 还有其他书籍：
+
++ [60天通过CCNA考试](https://ccna60d.xfoss.com)，一本基础的网络通讯书，翻译自国外经典 CCNA 60 days
++ [TypeScript 手册](https://ts.xfoss.com/)，一本TypeScript的入门书籍，翻译自 TypeScript官方网站
+
+
 Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放源代码内容管理系统。
 
 本教程由以下章节构成，希望在学习这些内容后，能对其有全面掌握与切实使用。
