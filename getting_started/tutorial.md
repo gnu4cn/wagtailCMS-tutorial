@@ -738,4 +738,73 @@ class BlogCategory(model.Models):
 
 > **注意** 请注意这里使用了`panels`而非`content_panels` -- 因为内容块一般不需要诸如别名（slug）或发布日期这类字段，所以他们的编辑界面就不会划分为标准的单独 `conent` / `promote` / `settings` 这样的分页了，且因此就不需要区分`content panels` 与 `promote panels`了
 
+将此修改提交到数据库，并经由已经在管理菜单的“Snippets(内容块)”区，创建一些分类。
 
+现在就可以将类别作为一个多对多关系字段，加入到 `BlogPage` 模型了。在此字段上使用的字段类型，就是`ParentalManyToManyField` -- 该字段类型，是标准的 Django `ManyToManyField` 字段类型的一个变种，Django的`ManyToManyField`确保所选的对象，与修订历史中的页面记录相对，已在数据库中正确存储，这与一对多关系中使用`ParentalKey`替换`ForeignKey`很类似。
+
+```python
+# 新加入了 `forms` 与 `ParentalManyToManyField`
+from django.db import models
+from django import forms
+
+# 新加入了 ParentalKey、Orderable、InlinePanel与ImageChooserPanel 的导入
+# 新加入了 ClusterTaggableManager、TaggedItemBase与MultiFieldPanel
+from modelcluster.fields import ParentalKey, ParentalManyToManyField
+from modelcluster.contrib.taggit import ClusterTaggableManager
+from taggit.models import TaggedItemBase
+
+# ...
+
+class BlogPage(Page):
+    date = models.DateField("发布日期")
+    intro = models.CharField(max_length=250)
+    body = RichTextField(blank=True)
+    tags = ClusterTaggableManager(through=BlogPageTag, blank=True)
+    categories = ParentalManyToManyField('blog.BlogCategory', blank=True)
+
+    # ... （保留 main_image 与 search_fields 的定义）
+    def main_image(self):
+        gallery_item = self.gallery_images.first()
+        if gallery_item:
+            return gallery_item.image
+        else:
+            return None
+
+    search_fields = Page.search_fields + [
+        index.SearchField('intro'),
+        index.SearchField('body'),
+    ]
+
+    content_panels = Page.content_panels + [
+        MultiFieldPanel([
+            FieldPanel('date'),
+            FieldPanel('tags'),
+            FieldPanel('categories', widget=forms.CheckboxSelectMultiple),
+        ], heading="文章信息"),
+        FieldPanel('intro'),
+        FieldPanel('body', classname="full"),
+        InlinePanel('gallery_images', label="图片"),
+    ]
+```
+
+这里在`FieldPanel` 定义上利用了 `widget` 关键字，用来指定一个基于复选框的小部件，而不是默认的多选框，因为小部件通常被认为更为用户友好。
+
+最后，对`blog_page.html`模板加以更新，让他显示出类别：
+
+```html
+    {% with categories=page.categories.all %}
+        {% if categories %}
+            <h3>发表在：</h3>
+            <ul>
+                {% for category in categories %}
+                    <li style="display: inline">
+                        {% image category.icon fill-32x32 style="vertical-align: middle" %}
+                        {{ category.name }}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    {% endwith %}
+```
+
+![带有类别的博客文章](images/tutorial_10.jpg)
