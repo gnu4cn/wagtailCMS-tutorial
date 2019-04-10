@@ -813,4 +813,8 @@ class BlogPage(Page):
 
 ![带有类别的博客文章](images/tutorial_10.jpg)
 
+## 下一步
 
++ 阅读Wagtail [使用手册](topics/index.md) 以及 [参考](reference/index.md) 文档
++ 学习如何使用 [StreamField](topics/streamfield.md) 来创建自由格式的页面内容
++ 浏览 [高级特性](advanced_topics/index.md) 部分并阅读 [第三方教程](advanced_topics/third-party_tutorials.md)
