@@ -622,4 +622,74 @@ class BlogPageGalleryImage(Orderable):
     {% endif %}
 ```
 
-请注意这里所链接到的页面，使用的是内建的`slugurl`而非早先使用的`pageurl`。二者的区别在于，`slugurl`取的是某个页面的别名（slug，来自“Promote”分页）作为参数。
+请注意这里所链接到的页面，使用的是内建的`slugurl`而非早先使用的`pageurl`。二者的区别在于，`slugurl`取的是某个页面的别名（slug，来自“Promote”分页）作为参数。而`pageurl`则更为常用，因为他更为明确，且避免了额外的数据库查询。但在该循环的具体情况下，页面对象并不是已可用的，因此这里倒退使用了更少用到的 `slugurl` 标签（the Page object isn't readily available, so we fall back on the less-preferred `slugurl` tag）。
+
+现在访问某个带有标签词的博客文章，就会看到在页面底部有了一些带有链接的按钮了 -- 每个按钮对应了一个标签词。但在点击某个按钮是将给出 `404` 错误，这是因为尚未定义一个“tags”视图的原因。将下面的代码加入到 `models.py`：
+
+```python
+class BlogTagIndexPage(Page):
+
+    def get_context(self, request):
+
+        # 以标签词进行过滤
+        tag = request.GET.get('tag')
+        blogpages = BlogPage.objects.filter(tags__name=tag)
+
+        # 更新模板上下文
+        context = super().get_context(request)
+        context['blogpages'] = blogpages
+        return context
+```
+
+请注意此基于页面的模型，并没有定义他自身的字段。就算没有字段，其对`Page`基类的子类化，也令到其成为Wagtail生态的一部分了。因此就可以在管理界面给他一个标题与URL，同时也就可以通过从其`get_context()`方法返回一个`QuerySet`，而对其内容进行操作（note that this Page-based model defines no fields of its own. Even without fields, subclassing `Page` makes it a part of the Wagtail ecosystem, so that you can give it a title and URL in the admin, and so that you can manipulate its contents by returning a QuerySet from its `get_context()` method）。
+
+将此改变提交到数据库，然后在管理界面创建一个新的`BlogTagIndexPage`。差不多要将此新的页面/试图，作为站点主页的一个子页面，而与博客首页并排进行创建。在`Promote`分栏给他一个`tags`的别名（slug）。
+
+现在去访问`/tags`的话，Django就会告诉你自己已然知道的东西：你需要创建一个`blog/blog_tag_index_page.html`的模板：
+
+> **注** 实际仍然要放在 `blog/templates/blog/`目录下。
+
+```txt
+TemplateDoesNotExist at /tags/
+blog/blog_tag_index_page.html
+       Request Method: GET
+          Request URL: http://localhost:8000/tags/
+       Django Version: 2.1.8
+       Exception Type: TemplateDoesNotExist
+      Exception Value: blog/blog_tag_index_page.html
+   Exception Location: /home/peng/.venv/lib/python3.6/site-packages/django/template/loader.py in get_template, line 19
+    Python Executable: /home/peng/.venv/bin/python
+       Python Version: 3.6.7
+          Python Path: ['/home/peng/wagtail-demo/demo',
+                         '/usr/lib/python36.zip',
+                         '/usr/lib/python3.6',
+                         '/usr/lib/python3.6/lib-dynload',
+                         '/home/peng/.venv/lib/python3.6/site-packages']
+           Server time: Wed, 10 Apr 2019 00:43:10 +0000
+```
+
+```html
+{% extends "base.html" %}
+{% load wagtailcore_tags %}
+
+{% block content %}
+    {% if request.GET.tag|length %}
+        <h4>显示标签为 “{{ request.GET.tag  }}” 页面</h4>
+    {% endif %}
+
+    {% for blogpage in blogpages %}
+        <p>
+            <strong><a href="{% pageurl blogpage %}">{{ blogpage.title }}</a></strong><br />
+            <small>修订于：{{ blogpage.latest_revision_created_at  }}</small><br />
+            {% if blogpage.author %}
+                <p>作者： {{ blogpage.author.profile }}</p>
+            {% endif %}
+        </p>
+
+        {% empty %}
+            未发现带有该标签词的文章。
+    {% endfor %}
+{% endblock %}
+```
+
+> **注** 管理界面创建的页面 `BlogTagIndexPage` 为什么不是一个新的、如同`blog`一样的应用？为什么`BlogTagIndexPage`对应的模板仍然要放在 `blog/templates/blog`目录下？这就与Django的 `get_context`方法有关，有关Django `get_context`方法的更多信息，请参阅[定制模板上下文](topics/pages.md#customising-template-context)
