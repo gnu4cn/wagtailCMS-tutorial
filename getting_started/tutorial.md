@@ -440,12 +440,14 @@ class BlogPageGalleryImage(Orderable):
 
     {{ page.body|richtext }}
 
-    {% for item in page.gallery_images.all %}
-        <div style="float: left; margin: 10px">
-            {% image item.image fill-320x240 %}
-            <p>{{ item.caption }}</p>
-        </div>
-    {% endfor %}
+    <section>
+        {% for item in page.gallery_images.all %}
+            <div style="display: inline-block; margin: 10px">
+                {% image item.image fill-320x240 %}
+                <p>{{ item.caption }}</p>
+            </div>
+        {% endfor %}
+    </section>
 
     <p><a href="{{ page.get_parent.url }}">返回博客首页</a></p>
 {% endblock %}
@@ -612,6 +614,7 @@ class BlogPageGalleryImage(Orderable):
 而要在`BlogPage`上渲染出标签，就要将下面的代码加入到`blog_page.html`：
 
 ```html
+<section>
     {% if page.tags.all.count %}
         <div class="tags">
             <h3>标签：</h3>
@@ -620,6 +623,7 @@ class BlogPageGalleryImage(Orderable):
             {% endfor %}
         </div>
     {% endif %}
+</section>
 ```
 
 请注意这里所链接到的页面，使用的是内建的`slugurl`而非早先使用的`pageurl`。二者的区别在于，`slugurl`取的是某个页面的别名（slug，来自“Promote”分页）作为参数。而`pageurl`则更为常用，因为他更为明确，且避免了额外的数据库查询。但在该循环的具体情况下，页面对象并不是已可用的，因此这里倒退使用了更少用到的 `slugurl` 标签（the Page object isn't readily available, so we fall back on the less-preferred `slugurl` tag）。
@@ -808,3 +812,5 @@ class BlogPage(Page):
 ```
 
 ![带有类别的博客文章](images/tutorial_10.jpg)
+
+
