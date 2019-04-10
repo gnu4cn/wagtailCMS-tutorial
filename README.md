@@ -18,7 +18,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - 演示网站
 
 + 使用Wagtail
-    - 页面模型
+    - [关于页面模型](topics/pages.md)
     - 编写模板
     - 在模板中使用图片
     - 搜索功能
@@ -36,7 +36,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - Wagtail哲學
 
 + 使用手册
-    - 页面模型
+    - [页面模型](topics/pages.md)
     - 编写模板
     - 在模板中使用图片
     - 搜索功能
