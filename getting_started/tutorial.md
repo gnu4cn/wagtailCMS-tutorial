@@ -622,4 +622,4 @@ class BlogPageGalleryImage(Orderable):
     {% endif %}
 ```
 
-
+请注意这里所链接到的页面，使用的是内建的`slugurl`而非早先使用的`pageurl`。二者的区别在于，`slugurl`取的是某个页面的别名（slug，来自“Promote”分页）作为参数。
