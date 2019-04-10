@@ -13,8 +13,8 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
 本教程由以下章节构成，希望在学习这些内容后，能对其有全面掌握与切实使用。
 
 + 初步
-    - 入门
-    - 第一个Wagtail站点
+    - [入门](getting_started.md)
+    - [第一个Wagtail站点](getting_started/tutorial.md)
     - 演示网站
 
 + 使用Wagtail
@@ -29,8 +29,8 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
 
 ## 索引
 
-+ 入门
-    - 第一个Wagtail站点
++ [入门](getting_started.md)
+    - [第一个Wagtail站点](getting_started/tutorial.md)
     - 演示站点
     - 将 Wagtail集成到某个Django项目
     - Wagtail哲學
