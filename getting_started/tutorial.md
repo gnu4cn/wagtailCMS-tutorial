@@ -693,3 +693,11 @@ blog/blog_tag_index_page.html
 ```
 
 > **注** 管理界面创建的页面 `BlogTagIndexPage` 为什么不是一个新的、如同`blog`一样的应用？为什么`BlogTagIndexPage`对应的模板仍然要放在 `blog/templates/blog`目录下？这就与Django的 `get_context`方法有关，有关Django `get_context`方法的更多信息，请参阅[定制模板上下文](topics/pages.md#customising-template-context)
+
+这里调用了`Page`模型上内建的 `latest_revision_created_at` 字段 -- 要知道这总是可用的。
+
+目前尚未给`BlogPage`模型加上`author`字段，也还没有博客文章作者的个人资料模型 -- 这些将留给读者作为练习。
+
+现在点击某个博客文章底部的标签词按钮，就能够渲染出类似于下面的页面了：
+
+![标签词首页页面](images/tutorial_9.png)
