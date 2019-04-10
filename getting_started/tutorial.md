@@ -692,7 +692,7 @@ blog/blog_tag_index_page.html
 {% endblock %}
 ```
 
-> **注** 管理界面创建的页面 `BlogTagIndexPage` 为什么不是一个新的、如同`blog`一样的应用？为什么`BlogTagIndexPage`对应的模板仍然要放在 `blog/templates/blog`目录下？这就与Django的 `get_context`方法有关，有关Django `get_context`方法的更多信息，请参阅[定制模板上下文](topics/pages.md#customising-template-context)
+> **注** 管理界面创建的页面 `BlogTagIndexPage` 为什么不是一个新的、如同`blog`一样的应用？为什么`BlogTagIndexPage`对应的模板仍然要放在 `blog/templates/blog`目录下？这是因为 `BlogTagIndexPage`是定义在 `blog/models.py`中的，因此只能将其视为应用`blog`的一部分，而非一个新的应用，同时其模板/视图也应位于 `blog/templates/blog`目录下。
 
 这里调用了`Page`模型上内建的 `latest_revision_created_at` 字段 -- 要知道这总是可用的。
 
@@ -701,3 +701,41 @@ blog/blog_tag_index_page.html
 现在点击某个博客文章底部的标签词按钮，就能够渲染出类似于下面的页面了：
 
 ![标签词首页页面](images/tutorial_9.png)
+
+## 分类
+
+**Categories**
+
+下面类给这里的博客加上分类系统（a category system）。与标签特性中某篇文章的作者可以简单地通过在页面上使用某个标签词，而将该标签词引入到页面既有标签词中有所不同，分类特性将会是一个由站点所有者经由管理界面的某个单独区域管理的固定清单（categories will be a fixed list, managed by the site owner through a separate area of the admin interface）。
+
+那么首先就要定义一个 `BlogCategory` 模型。某个类别不是有着自身地位的页面，因此要将其定义为标准的Django `models.Model`，而非从`Page`基类加以继承。Wagtail引入了“内容片（Snippets）”这一概念，专门用于那些需要通过管理界面进行管理，但又并不是作为页面树本身的组成部分而存在的，可重用小块内容；那么这类模型就可以通过`@register_snippet`装饰器，而作为内容片进行注册。到目前位置在页面上用到的所有字段类型，都可以用在内容片上 -- 下面将给予每个类别一个图标和名称。将下面的代码加入到 `blog/models.py`：
+
+```python
+# 新加入 Wagtail 的 @register_snippet 装饰器，有关 Python 装饰器的更多信息，请
+# 参考：[使用装饰器](https://github.com/gnu4cn/python-advance-book/blob/master/01-effective-and-fine-python-code.md#%E4%BD%BF%E7%94%A8%E8%A3%85%E9%A5%B0%E5%99%A8)
+
+from wagtail.snippets.models import register_snippet
+
+@register_snippet
+class BlogCategory(model.Models):
+    name = models.CharField(max_length=250)
+    icon = models.ForeignKey(
+        'wagtailimages.Image', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name="+"
+    )
+
+    panels = [
+        FieldPanel('name'),
+        ImageChooserPanel('icon'),
+    ]
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name_plural = '博客类别'
+```
+
+> **注意** 请注意这里使用了`panels`而非`content_panels` -- 因为内容块一般不需要诸如别名（slug）或发布日期这类字段，所以他们的编辑界面就不会划分为标准的单独 `conent` / `promote` / `settings` 这样的分页了，且因此就不需要区分`content panels` 与 `promote panels`了
+
+
