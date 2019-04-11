@@ -203,5 +203,169 @@ super().get_url_parts(*args, **kwargs)
 
 有关此方面的更多信息，请参阅[wagtail.core.models.Page.get_url()](reference/pages/model_reference.md#wagtail.core.models.Page.get_url)。
 
+在需要完整的URL（包含协议与域名）时，可使用`Page.get_full_url(request)`方法。同样应尽可能包含`request`参数，为的是启用站点级别的URL信息的历次请求的缓存。有关此方面的更多信息，请参阅[wagtail.core.models.Page.get_full_url()](reference/pages/model_reference.md#wagta      il.core.models.Page.get_full_url)
+
+## 模板的渲染
+
+可以给予每个页面模型一个HTML的模板，在用户浏览到站点前端的某个页面时，模板将被渲染出来。这就是将Wagtail内容给到终端用户的最简单也是最常见方式（这不是唯一的方式哦）。
+
+### 将某个页面模型的模板添加进来
+
+Wagtail将基于应用级别与模型类的名称，自动选择模板的名称。
+
+格式为：`<app_label>/<model_name(蛇姓字母的)>.html`
+
+> **注** 蛇形字母写法，snake cased，参见[Snake case, wikipedia](https://en.wikipedia.org/wiki/Snake_case)
+
+比如上面的博客页面的模板将是： `blog/blog_page.html`
+
+只需在某个可以此名称访问到的地方，创建一个模板即可。
+
+### 模板上下文
+
+**Template context**
+
+Wagtail 将以绑定到正在渲染的页面实力上的`page`变量，来进行模板的渲染。使用该变量来访问页面的内容。比如要获得当前页面的标题，就使用`{{ page.title }}`。所有由 [上下文处理器](https://docs.djangoproject.com/en/stable/ref/templates/api/#subclassing-context-requestcontext) 提供的变量，也都是可用的。
+
+** 模板上下文的定制 **
+
+所有页面都有一个`get_context()`方法，在渲染模板时，都会调用到该方法，其返回值为绑定到模板变量的一个字典。
+
+可通过覆写该方法，来讲更多变量加入到模板上下文：
+
+```python
+class BlogIndexPage(Page):
+    ...
+
+    def get_context(self, request):
+        context = super().get_context(request)
+
+        # 加入额外变量，并返回更新后的上下文
+        context['blog_entries'] = BlogPage.objects.child_of(self).live()
+        # 注意上面就是一个 QuerySet
+        return context
+```
+
+此时这些变量就可以在模板中加以使用了：
+
+```python
+{{ page.title }}
+
+{% for enry in blog_entries %}
+    {{ entry.titlte }}
+{% endfor %}
+```
+
+### 修改模板
+
+通过在类上设置 `template` 属性，来使用一个不同的模板文件：
+
+```python
+class BlogPage(Page):
+    ...
+
+    template = 'other_tempalte.html'
+```
+
+**动态地选择模板**
+
+通过在页面类上定义`get_template()`方法，可以给每个实例指定不同的模板。在每次页面被渲染时，都会调用该方法：
+
+```python
+class BlogPage(Page):
+    ...
+
+    use_other_template = models.BooleanField()
+
+    def get_template(self, request):
+        if self.use_other_template:
+            return 'blog/other_blog_page.html'
+
+        return 'blog/blog_page.html'
+```
+
+在本示例中，那些设置了`use_other_template`字段的页面，将使用`blog/other_blog_page.html`模板。所有其他页面都将使用默认的`blog/blog_page.html`。
+
+### 在页面渲染上的更多控制
+
+所有页面类，都有一个`serve()`方法，该方法内部调用了`get_context`与`get_template`方法，进而对模板进行渲染。此方法与Django的视图函数类似，取的是一个Django `Request` 对象，返回的是一个 Django `Response` 对象。
+
+为实现对页面渲染的完全掌控，此方法可被重写。
+
+比如下面就是一种让页面以一个表示其自身的JSON方式进行响应的方法：
+
+```python
+from django.http import JsonResponse
+
+class BlogPage(Page):
+    ...
+
+    def serve(self, request):
+        return JsonResponse({
+            'title': self.title,
+            'body': self.body,
+            'date': self.date,
+
+            # 将图片缩放到宽度为 300px 并取得到图片的URL
+            'feed_image': self.feed_image.get_rendition('width-200').url,
+        })
+```
+
+## 内联模型
+
+**Inline models**
+
+Wagtail可在页面中嵌套其他模型的内容。对于创建那些诸如相关链接，或要以旋转木马方式显示的重复字段，此特性是有用的。内联模型的内容，与其他页面内容一样，保存在版本变更中。
+
+每个内联模型，都有以下要求：
+
++ 必须继承自`wagtail.core.models.Orderable`
++ 必须要有一个到父模型的`ParentalKey`
+
+> **注意** `django-modelcluster`与`ParentalKey`的区别
+> 模型的内联特性，是由[`django-modelcluster`](https://github.com/torchbox/django-modelcluster)所提供的，同时必须要从这里将`ParentalKey`字段类型导入进来：
+> `from modelcluster.fields import ParentalKey`
+> `ParentalKey` 是 Django 的`ForeignKey`的一个子类，并取的是同样的参数。
 
 
+比如下面的内联模型就可用于将相关链接（一个名称-url对的的列表）加入到`BlogPage`模型：
+
+```python
+from django.db import models
+from modelcluster.fields import ParentalKey
+from wagtail.core.models import Orderable
+
+class BlogPageRelatedLink(Orderable):
+    page = ParentalKey(BlogPage, on_delete=models.CASCADE, realted_name='related_links')
+    name = models.CharField(max_length=250)
+    url = models.URLField()
+
+    panels = [
+        FieldPanel('name'),
+        FieldPanel('url'),
+    ]
+```
+
+接着使用`InlinePanel`编辑面板类，将其加入到管理界面：
+
+```python
+content_panels = [
+    ...
+
+    InlinePanel('related_links', label="相关链接"),
+]
+```
+
+`InlinePanel`类构造函数的第一个参数，必须与`ParentalKey`的`related_name`属性一致。
+
+## 处理多个页面
+
+**Working with pages**
+
+Wagtail使用了Django的 [多表继承](https://docs.djangoproject.com/en/stable/topics/db/models/#multi-table-inheritance) 特性，来实现在相同的树中使用多个页面模型。
+
+每个页面都会被同时加入到Wagtail内建的`Page`模型，以及其用户定义的模型（比如早先所创建的`BlogPage`模型）。
+
+相应地，页面可以两种形式的Python代码存在，`Page`基类的示例，或页面模型的示例。
+
+    在一并处理多个页面类型时，通常使用的是Wagtail的 `Page` 模型，
