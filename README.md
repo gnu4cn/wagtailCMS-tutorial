@@ -13,7 +13,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
 本教程由以下章节构成，希望在学习这些内容后，能对其有全面掌握与切实使用。
 
 + 初步
-    - [入门](getting_started.md)
+    - [入门](getting_started/index.md)
     - [第一个Wagtail站点](getting_started/tutorial.md)
     - 演示网站
 
@@ -29,13 +29,17 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
 
 ## 索引
 
+
 + [入门](getting_started.md)
+
     - [第一个Wagtail站点](getting_started/tutorial.md)
     - 演示站点
     - 将 Wagtail集成到某个Django项目
-    - Wagtail哲學
+    - [Wagtail哲學](getting_started/the_zen_of_wagtail.md)
+
 
 + 使用手册
+
     - [页面模型](topics/pages.md)
     - 编写模板
     - 在模板中使用图片
@@ -45,7 +49,9 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - 使用 StreamField 的自由格式页面内容
     - 页面访问权限
 
+
 + 高级话题
+
     - 图片
     - 文档
     - 嵌入的内容
@@ -60,7 +66,9 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - 对Wagtail站点进行测试
     - Wagtail编程接口
 
+
 + 参考文档
+
     - 页面
     - 贡献模块
     - 管理命令
@@ -68,9 +76,12 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - 信号
     - 项目模板
 
+
 + 支持
 
+
 + Wagtail的使用：内容编辑手册
+
     - 简介
     - 入门
     - 找到你自己的方式
@@ -81,7 +92,9 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - 管理员的任务
     - 浏览器问题
 
+
 + 贡献到Wagtail
+
     - 问题追踪
     - 开发
     - 提交代码
