@@ -368,4 +368,70 @@ Wagtail使用了Django的 [多表继承](https://docs.djangoproject.com/en/stabl
 
 相应地，页面可以两种形式的Python代码存在，`Page`基类的示例，或页面模型的示例。
 
-    在一并处理多个页面类型时，通常使用的是Wagtail的 `Page` 模型，
+在一并处理多个页面类型时，通常使用的是Wagtail的 `Page` 模型，其不会给予到对特定于这些页面类型的那些字段的访问。
+
+```bash
+# 获取数据库中的所有页面
+>>> from wagtail.core.models import Page
+>>> Page.objects.all()
+[<Page: Homepage>, <Page: About us>, <Page: Blog>, <Page: A Blog post>, <Page: Another Blog post>]
+```
+
+> **注** 通过 `python manage.py shell` 即可进入到上面的命令行界面
+
+在处理单个的页面类型时，就可以对用户定义的模型实例进行处理了。这样的模型实例，给予到对`Page`中所有可用字段的访问，以及对该特定类型的用户定义字段的访问。
+
+```bash
+# 获取数据库中所有的博客条目
+>>> from blog.models import BlogPage
+>>> BlogPage.objects.all()
+[<BlogPage: A Blog post>, <BlogPage: Another Blog post>]
+```
+
+使用`.specfific`属性，就可以将某个`Page`对象，转换为其更为具体的用户定义的等价实体。然而这会引发一次额外的数据库查询。
+
+```bash
+>>> page = Page.objects.get(title='A Blog Post')
+>>> page
+<Page: A Blog post>
+
+# 注意：该博客文章是 Page 的一个实例，因此不能访问到文章主体、日期或首页图片
+
+>>> page.specific
+<BlogPage: A Blog post>
+```
+
+## 技巧
+
+### 友好的模型名称
+
+运用带有 `verbose_name` 属性的Django的内部`Meta`类，可令到模型名称对用户更为友好，比如：
+
+```python
+class HomePage(Page):
+
+    ...
+
+    class Meta:
+        verbose_name = "homepage"
+```
+
+默认情况下，在用户选择创建要创建的页面时，页面类型清单是通过将模型名称按照大写字符拆分，而生成的。那么`HomePage`模型就将被命名为“Home Page”，显然这个名字有点笨拙。在如同上面的示例中那样定义了 `verbose_name`后，就会将名称修改为“Homepage”，这样就更为习以为常一点。
+
+> verbose: 详细
+
+### 页面QuerySet的排序
+
+由基类`Page`所派生的模型，是 *无法* 通过使用标准的加入 `ordering` 属性到模型内部的`Meta`类上，这种标准的Django 方法，而赋予给他一种默认排序的。
+
+```python
+Class NewsItemPage(Page):
+    
+    publication_date = models.DateField()
+    ...
+
+    class Meta:
+        ordering = ('-publication_date', ) # 不会生效
+```
+
+这是因为`Page` 
