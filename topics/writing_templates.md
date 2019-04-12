@@ -96,14 +96,11 @@ name_of_project/
 
 在模板中，只有那些使用了`RichTextField`的字段，才需要应用此过滤器。
 
-```html
-    {% raw %}
     {% load wagtailcore_tags %}
-    {% endraw %}
 
     ...
     {% page.body|richtext %}
-```
+
 
 ### 响应式嵌入内容
 
@@ -138,13 +135,9 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     从某个页面对象，在该页面与当前页面为同一个站点时，返回一个相对的URL（`/foo/bar/`），在不是同一个站点时，返回一个绝对URL（`http://example.com/foo/bar/`）。
 
-    ```html
-    {% raw %}
-    {% load wagtailcore_tags %}
-    ...
-    <a href="{% pageurl page.blog_page %}">
-    {% endraw %}
-    ```
+        {% load wagtailcore_tags %}
+        ...
+        <a href="{% pageurl page.blog_page %}">
 
 + `slugurl`
 
@@ -152,48 +145,36 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     与`pageurl`类似，该标签在可能的情况下会提供一个相对链接，在所给页面位于不同站点时，则会默认为一个绝对链接。这在创建共享页面特性时，比如顶层的导航栏，或全站链接时，是最有用的（like `pageurl`, this will try to provide a relative link if possible, but will default to an absolute link if the Page is on a different Site. This is most useful when creating shared page feature, e.g. top level navigation or site-wide links）。
 
-    ```html
-    {% raw %}
-    {% load wagtailcore_tags %}
-    ...
-    <a href="{% slugurl 'news' %}">News index</a>
-    {% endraw %}
-    ```
+        {% load wagtailcore_tags %}
+        ...
+        <a href="{% slugurl 'news' %}">News index</a>
+
 
 ### 静态文件（标签）
 
 该标签用于从静态文件目录装入任意文件。该标签的使用，避免了在主机环境变化时重写静态路径，因为在开发环境下与上线后这些静态路径可能有所不同。
 
-```html
-{% raw %}
-{% load static %}
-{% endraw %}
-...
-<img src="{% static "name_of_app/myimage.jpg" %}" alt="My image" />
-```
+    {% load static %}
+    {% endraw %}
+    ...
+    <img src="{% static "name_of_app/myimage.jpg" %}" alt="My image" />
+
 
 ## Wagtail的用户栏
 
 该标签为已登入用户提供了一个上下文弹出菜单（a contextual flyout menu）。该菜单给网站编辑提供了编辑当前页面或加入一个子页面的能力，以及在Wagtail页面浏览器中显示该页面，或前往Wagtail管理控制台的选项。对于网站主编，也能够通过用户栏，完成对某个提交预览的页面予以通过或撤回的内容审核工作。
 
-```html
-{% raw %}
-{% load wagtailuserbar %}
-{% endraw %}
-...
-{% wagtailuserbar %}
-```
+    {% load wagtailuserbar %}
+    ...
+    {% wagtailuserbar %}
 
 
 默认用户栏从浏览器窗口边缘插入到页面的右下角。如此默认行为与设计有冲突，就可通过传入一个参数到该模板标签，而对其进行移动。下面的示例给出了将用户栏放置于屏幕各个角落的方法：
 
-```html
-...
-{% wagtailuserbar 'top-left' %}
-{% wagtailuserbar 'top-right' %}
-{% wagtailuserbar 'bottom-left' %}
-{% wagtailuserbar 'bottom-right' %}
-```
+    {% wagtailuserbar 'top-left' %}
+    {% wagtailuserbar 'top-right' %}
+    {% wagtailuserbar 'bottom-left' %}
+    {% wagtailuserbar 'bottom-right' %}
 
 用户栏也可以放置于任何最有利于设计的地方。此外，可在CSS文件中以CSS规则的方式，来确定他的放置位置，比如：
 
@@ -209,12 +190,10 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
 有的时候可能希望是否依据页面经由预览或上线查看，来对模板输出进行检查。比如在站点上有着诸如Google Analytics这样的访问者追踪代码时，那么在预览时进行检查就比较好，因为这样做的话，站点编辑的操作，不会出现在分析报告中。Wagtail提供了一个`request.is_preview`的变量，来对预览和上线进行区分：
 
-```html
-{% if not request.is_preview %}
-    <script>
-        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-            ...
-        }})
-    </script>
-{% endif %}
-```
+    {% if not request.is_preview %}
+        <script>
+            (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                ...
+            }})
+        </script>
+    {% endif %}
