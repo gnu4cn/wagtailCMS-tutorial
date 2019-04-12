@@ -12,3 +12,4 @@
 
     * [关于页面模型](topics/pages.md) 
     * [编写模板](topics/writing_templates.md)
+    * [在模板中使用图片](topics/images.md)
