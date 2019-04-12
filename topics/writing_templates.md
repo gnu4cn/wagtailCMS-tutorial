@@ -32,7 +32,124 @@ name_of_project/
 
 进入到各个页面的数据/内容，是通过Django的 `{{ double-brace }}`表示法来i就那些访问/输出的。模型中的每个字段，都必须通过前缀`page.`来进行访问。比如页面标题`{{ page.title }}`或另一个`{{ page.author }}`字段。
 
-额外的`request.`也是可用的，该对象包含了Django的请求对象。
+此外，`request.`也是可用的，该对象包含了Django的请求对象。
 
 <a name="static_files"></a>
 ## 静态文件
+
+像是CSS、JS与图片这样的静态文件，通常存储在这里：
+
+```bash
+name_of_project/
+    name_of_app/
+        static/
+            name_of_app/
+                css/
+                js/
+                images/
+        models.py
+```
+
+（其中的文件夹名`css`、`js`等并不重要，那只是他们在树中的位置）
+
+`static`文件中中的所有文件，都应通过使用`{% static %}`标签，插入到HTML中。更多有关此方面的内容：[静态文件（标签）](#static-tag)。
+
+### 用户的图片
+
+由用户上传到Wagtail站点的图片（与上面提到的开发者的静态文件相反），被放入到图片库中，并通过[页面编辑器界面](editor_manual/new_pages/inserting_images.md)从图片库添加到页面。
+
+与其他内容管理系统不同，将图片添加到页面并不涉及到所使用图片“版本”的选择。Wagtail没有预先定义的图片“格式”或“尺寸”。而是有模板开发者，通过一种模板中的特殊语法，来定义图片操作，这种图片操作，实在图片被请求时， *于操作中* 进行的（Instead the template developer defines image manipulation to occur *on the fly* when the image is requested, via a special syntax within the template）。
+
+图片库中的图片，必须通过这种语法加以请求，但对于开发者的静态图片，则可通过传统方式，比如`img` 标签，予以添加。只有图片库中的图片，才能够 *于操作中* 进行处理。
+
+更过有关这种图片处理语法的信息，请参考：[在模板中使用图片](topics/images.md#image-tag)。
+
+
+## 模板的标签与过滤器
+
+除了Django的标准标签与过滤器外，Wagtail还其他了一些自己的标签与过滤器，这些标签与过滤器可[如同其他标签与过滤器一样](https://docs.djangoproject.com/en/stable/howto/custom-template-tags/)，通过 `load` 进行加载。
+
+
+### 图片（标签）
+
+`image`标签，将一个兼容XHTML的`img`元素，插入到页面中，并设置其 `src`、`width`、`height`与`alt`属性。请参阅[对`img`标签的更多控制](topics/images.md#image-tag-alt)。
+
+`image`标签的语法如下：
+
+```html
+{% image [image] [resize-rule] %}
+```
+
+示例：
+
+```html
+{% load wagtailimages_tags %}
+...
+
+{% image page.photo width-400 %}
+
+<!-- 或一个正方形的缩略图： -->
+{% image page.photo file-80x80 %}
+```
+
+请参阅完整文档 [在模板中使用图片](topics/images.md#image-tag)。
+
+### 富文本（过滤器）
+
+此过滤器将一块HTML内容，在页面中作为安全的HTML进行渲染。重要的是他还将HTML块内部的缩略式引用展开为嵌入式图片，以及将那些在Wagtail编辑器中制作的链接，展开为可供显示的恰当的HTML。
+
+在模板中，只有那些使用了`RichTextField`的字段，才需要应用此过滤器。
+
+```html
+{% load wagtailcore_tags %}
+
+...
+
+{% page.body|richtext %}
+```
+
+### 响应式嵌入内容
+
+**Responsive Embeds**
+
+Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的，这样做可能超出在模板中定义的嵌入内容容器的边界。要让图片与嵌入内容成为响应式的 -- 那意味着这些内容将缩放到适合他们的容器的大小 -- 请将下面的CSS加入到站点样式表中：
+
+```css
+.rich-text img {
+    max-width: 100%;
+    height: auto/
+}
+
+.responsive-object {
+    position: relative;
+}
+
+.responsive-object iframe;
+.responsive-object object;
+.responsive-object embed {
+    position: absolute;
+    top: 0;
+    left 0;
+    width: 100%;
+    height: 100%;
+}
+```
+
+### 内部的链接（标签）
+
++ `pageurl`
+
+    从某个页面对象，在该页面与当前页面为同一个站点时，返回一个相对的URL（`/foo/bar/`），在不是同一个站点时，返回一个绝对URL（`http://example.com/foo/bar/`）。
+
+    ```html
+    {% load wagtailcore_tags %}
+    ...
+
+    <a href="{% pageurl page.blog_page %}">
+    ```
+
++ `slugurl`
+
+    从页面的“Promote”分页中定义的`slug`，返回一个与该页面匹配的URL。如该别名下存在多个页面，那么就确定不下来所选的页面了。
+
+    与`pageurl`类似，该标签
