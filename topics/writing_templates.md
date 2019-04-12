@@ -76,23 +76,17 @@ name_of_project/
 
 `image`标签的语法如下：
 
-```html
     {% image [image] [resize-rule] %}
-```
 
 示例：
 
-```html
-    {% raw %}
     {% load wagtailimages_tags %}
-    {% endraw %}
     ...
 
     {% image page.photo width-400 %}
 
     <!-- 或一个正方形的缩略图： -->
     {% image page.photo file-80x80 %}
-```
 
 请参阅完整文档 [在模板中使用图片](topics/images.md#image-tag)。
 
