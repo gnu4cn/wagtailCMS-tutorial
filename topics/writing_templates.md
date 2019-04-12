@@ -158,10 +158,12 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
 该标签用于从静态文件目录装入任意文件。该标签的使用，避免了在主机环境变化时重写静态路径，因为在开发环境下与上线后这些静态路径可能有所不同。
 
+    {% raw %}
     {% load static %}
     {% endraw %}
     ...
     <img src="{% static "name_of_app/myimage.jpg" %}" alt="My image" />
+    {% endraw %}
 
 
 ## Wagtail的用户栏
