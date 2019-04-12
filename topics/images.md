@@ -29,64 +29,64 @@
 
 + `max`
     
-    （要取两个尺寸值）
+（要取两个尺寸值）
 
     {% raw %}
     {% iamge page.photo max-1000x500 %}
     {% endraw %}
 
 
-    调整到给定的尺寸 **里面**。
+调整到给定的尺寸 **里面**。
 
-    图片四个边中最长的那个边，将降低到所指定的匹配尺寸。比如一张宽为 `1000` 高为 `2000`的纵向图片，在以`max-1000x500`规则（一个横向布局）进行处理时，将生成一张被压缩的图片，那么最后的 *高度* 就是 `500` 像素，宽度为 `250` 像素了。
+图片四个边中最长的那个边，将降低到所指定的匹配尺寸。比如一张宽为 `1000` 高为 `2000`的纵向图片，在以`max-1000x500`规则（一个横向布局）进行处理时，将生成一张被压缩的图片，那么最后的 *高度* 就是 `500` 像素，宽度为 `250` 像素了。
 
-    ![图片的 `max` 过滤器](images/image_filter_max.png)
+![图片的 `max` 过滤器](images/image_filter_max.png)
 
-    *示例：图片将保持其宽高比，但将被缩放到所能提供的最大尺寸（Example: The image will keep its proportions but fit within the max(green line) dimensions provided）*
+*示例：图片将保持其宽高比，但将被缩放到所能提供的最大尺寸（Example: The image will keep its proportions but fit within the max(green line) dimensions provided）*
 
 
 + `min`
 
-    （要取两个尺寸值）
+（要取两个尺寸值）
 
     {% raw %}
     {% image page.photo min-500x200 %}
     {% endraw %}
 
-    **覆盖** 所给定的尺寸。
+**覆盖** 所给定的尺寸。
 
-    此图片过滤器将导致图片些许 **大于** 所制定的尺寸。对于一个方形的宽为 `2000` 高为`2000`的图片，在以`min-500x200`规则下，将令到其高度与宽度均为 `500` 像素，也就是要匹配调整规则的 *宽度*，但要所得图片高度要大于规则中的高度。
+此图片过滤器将导致图片些许 **大于** 所制定的尺寸。对于一个方形的宽为 `2000` 高为`2000`的图片，在以`min-500x200`规则下，将令到其高度与宽度均为 `500` 像素，也就是要匹配调整规则的 *宽度*，但要所得图片高度要大于规则中的高度。
 
-    ![图片过滤器 `min`](images/image_filter_min.png)
+![图片过滤器 `min`](images/image_filter_min.png)
 
-    *示例：图片将保持其宽高比，但将缩放到所能提供的最小尺寸（Example: The image will keep its proportions while filling at least the min(green line) dimensions provided）*
+*示例：图片将保持其宽高比，但将缩放到所能提供的最小尺寸（Example: The image will keep its proportions while filling at least the min(green line) dimensions provided）*
 
 + `width`
     
-    （只取一个尺寸值）
+（只取一个尺寸值）
 
     {% raw %}
     {% image page.photo width-640 %}
     {% endraw %}
 
-    将图片的宽度，缩放到所指定的尺寸。
+将图片的宽度，缩放到所指定的尺寸。
 
 + `height`
 
-    （只取一个尺寸值）
+（只取一个尺寸值）
 
     {% raw %}
     {% image page.photo height-480 %}
     {% endraw %}
 
-    将图片的高度，缩放到所指定的尺寸。
+将图片的高度，缩放到所指定的尺寸。
 
 + `scale`
 
-    （取一个百分数）
+（取一个百分数）
 
     {% raw %}
     {% image page.photo height-480 %}
     {% endraw %}
 
-    将图片的高度，缩放到所指定的尺寸。
+将图片的高度，缩放到所指定的尺寸。
