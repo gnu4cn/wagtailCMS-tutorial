@@ -135,11 +135,11 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     从某个页面对象，在该页面与当前页面为同一个站点时，返回一个相对的URL（`/foo/bar/`），在不是同一个站点时，返回一个绝对URL（`http://example.com/foo/bar/`）。
 
-        {% raw %}
+    {% raw %}
         {% load wagtailcore_tags %}
         ...
         <a href="{% pageurl page.blog_page %}">
-        {% endraw %}
+    {% endraw %}
 
 + `slugurl`
 
@@ -147,22 +147,22 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     与`pageurl`类似，该标签在可能的情况下会提供一个相对链接，在所给页面位于不同站点时，则会默认为一个绝对链接。这在创建共享页面特性时，比如顶层的导航栏，或全站链接时，是最有用的（like `pageurl`, this will try to provide a relative link if possible, but will default to an absolute link if the Page is on a different Site. This is most useful when creating shared page feature, e.g. top level navigation or site-wide links）。
 
-        {% raw %}
+    {% raw %}
         {% load wagtailcore_tags %}
         ...
         <a href="{% slugurl 'news' %}">News index</a>
-        {% endraw %}
+    {% endraw %}
 
 
 ### 静态文件（标签）
 
 该标签用于从静态文件目录装入任意文件。该标签的使用，避免了在主机环境变化时重写静态路径，因为在开发环境下与上线后这些静态路径可能有所不同。
 
-    {% raw %}
+{% raw %}
     {% load static %}
     ...
     <img src="{% static "name_of_app/myimage.jpg" %}" alt="My image" />
-    {% endraw %}
+{% endraw %}
 
 
 ## Wagtail的用户栏
