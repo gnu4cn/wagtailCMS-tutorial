@@ -11,3 +11,4 @@
 * [使用手册](topics/index.md)
 
     * [关于页面模型](topics/pages.md) 
+    * [编写模板](topics/writing_templates.md)
