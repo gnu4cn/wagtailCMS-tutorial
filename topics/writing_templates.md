@@ -135,9 +135,11 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     从某个页面对象，在该页面与当前页面为同一个站点时，返回一个相对的URL（`/foo/bar/`），在不是同一个站点时，返回一个绝对URL（`http://example.com/foo/bar/`）。
 
+        {% raw %}
         {% load wagtailcore_tags %}
         ...
         <a href="{% pageurl page.blog_page %}">
+        {% endraw %}
 
 + `slugurl`
 
