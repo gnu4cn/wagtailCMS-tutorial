@@ -147,9 +147,11 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
     与`pageurl`类似，该标签在可能的情况下会提供一个相对链接，在所给页面位于不同站点时，则会默认为一个绝对链接。这在创建共享页面特性时，比如顶层的导航栏，或全站链接时，是最有用的（like `pageurl`, this will try to provide a relative link if possible, but will default to an absolute link if the Page is on a different Site. This is most useful when creating shared page feature, e.g. top level navigation or site-wide links）。
 
+        {% raw %}
         {% load wagtailcore_tags %}
         ...
         <a href="{% slugurl 'news' %}">News index</a>
+        {% endraw %}
 
 
 ### 静态文件（标签）
