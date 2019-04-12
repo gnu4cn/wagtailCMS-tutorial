@@ -162,9 +162,7 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
     {% raw %}
     {% load wagtailcore_tags %}
     ...
-
     <a href="{% slugurl 'news' %}">News index</a>
-
     {% endraw %}
     ```
 
