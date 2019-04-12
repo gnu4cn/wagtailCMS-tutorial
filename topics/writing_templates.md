@@ -146,11 +146,11 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
     从某个页面对象，在该页面与当前页面为同一个站点时，返回一个相对的URL（`/foo/bar/`），在不是同一个站点时，返回一个绝对URL（`http://example.com/foo/bar/`）。
 
     ```html
-        {% raw %}
-        {% load wagtailcore_tags %}
-        ...
-        <a href="{% pageurl page.blog_page %}">
-        {% endraw %}
+    {% raw %}
+    {% load wagtailcore_tags %}
+    ...
+    <a href="{% pageurl page.blog_page %}">
+    {% endraw %}
     ```
 
 + `slugurl`
@@ -217,7 +217,7 @@ Wagtail在包含嵌入内容与图片时，是以其完整宽度进行嵌入的�
 
 有的时候可能希望是否依据页面经由预览或上线查看，来对模板输出进行检查。比如在站点上有着诸如Google Analytics这样的访问者追踪代码时，那么在预览时进行检查就比较好，因为这样做的话，站点编辑的操作，不会出现在分析报告中。Wagtail提供了一个`request.is_preview`的变量，来对预览和上线进行区分：
 
-```
+```html
 {% if not request.is_preview %}
     <script>
         (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
