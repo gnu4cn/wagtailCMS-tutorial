@@ -434,4 +434,50 @@ Class NewsItemPage(Page):
         ordering = ('-publication_date', ) # 不会生效
 ```
 
-这是因为`Page` 
+这是因为`Page`是强制以路径对QuerySet进行排序的。 因此在构造一个QuerySet时，就必须显示地进行排序：
+
+```python
+news_items = NewsItemPage.objects.live().order_by('-publication_date')
+```
+
+### 对页面管理器进行定制
+
+可将定制的`Manager`类，添加到`Page`类。所有定制管理器，都应继承自`wagtail.core.models.PageManager`：
+
+```python
+from django.db import models
+
+from wagtail.core.models import Page, PageManager
+
+class EventPageManager(PageManager):
+    """ 活动页面的定制管理器  """
+
+class EventPage(Page):
+
+    start_date = models.DateField()
+
+    objects = EventPageManager()
+```
+
+而在仅需加入额外的 `QuerySet` 方法时，还可以从`wagtail.core.models.PageQuerySet` 继承， 并调用`from_queryset()`来构建一个定制的 `Manager` 类：
+
+```python
+from django.db import models
+from django.utils import timezone
+
+from wagtail.core.models import Page, PageManager, PageQuerySet
+
+class EventPageQuerySet(PageQuerySet):
+
+    def future(self):
+        today = timezone.localtime(timezone.now()).date()
+        return self.filter(start_date__gte=today)
+
+EventPageManager = PageManager.from_queryset(EventPageQuerySet)
+
+class EventPage(Page):
+    
+    start_date = models.DateField()
+
+    objects = EventPageManager()
+```
