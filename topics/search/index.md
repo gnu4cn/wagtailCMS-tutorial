@@ -9,11 +9,13 @@ Wagtail提供了全面且可扩展的搜索接口。此外，其还经由“站�
     - [对额外字段进行索引](indexing.html#indexing-extra-fields)
     - [对定制模型建立索引](indexing.html#indexing-custom-models)
 
+
 + [进行搜索](searching.html)
 
     - [搜索的QuerySet](searching.html#searching-querysets)
     - [页面搜索视图示例](searching.html#an-example-page-search-view)
     - [提升后的搜索结果](searching.html#promoted-search-results)
+
 
 + [搜索后端](backends.html)
 
