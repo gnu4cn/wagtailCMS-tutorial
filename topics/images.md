@@ -278,7 +278,7 @@ WAGTAILIMAGES_JPEG_QUALITY = 40
 >>> Rendition.objects.all().delete()
 ```
 
-### 以各个标签进行修改
+### 依各个标签进行修改
 
 通过使用`jpegquality`过滤器，也可在单个标签基础上，有着不同的JPEG质量。这样总是会覆写默认设置：
 
