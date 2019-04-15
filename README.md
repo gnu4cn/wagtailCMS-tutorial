@@ -21,7 +21,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - [关于页面模型](topics/pages.md)
     - [编写模板](topics/writing_templates.md)
     - [在模板中使用图片](topics/images.md)
-    - 搜索功能
+    - [搜索功能](topics/search/index.md)
     - 第三方教程
 
 + 致内容编辑者
@@ -43,7 +43,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - [页面模型](topics/pages.md)
     - [编写模板](topics/writing_templates.md)
     - [在模板中使用图片](topics/images.md)
-    - 搜索功能
+    - [搜索功能](topics/search/index.md)
     - 代码片段
     - 页面片段
     - 使用 StreamField 的自由格式页面内容
