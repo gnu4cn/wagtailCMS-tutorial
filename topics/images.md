@@ -150,3 +150,148 @@
 
 > **注意** Wagtail并不允许对图片做变形或拉伸处理。图片尺寸比例将始终保持不变。Wagtail 也 *不支持图片的放大*。若强制以较大尺寸来显示较小的图片，那么将以其原生尺寸进行 “最大化（max out）”。
 
+<a name="more-control-over-the-img-tag"></a>
+## 对`img`标签的更多控制
+
+Wagtail提供了两个赋予到对`img`元素更多控制的捷径：
+
+### 1. 给 `{% image %}` 标签加上属性
+
+可使用`attribute="value"` 语法，来制定一些额外的属性：
+
+```html
+{% image page.photo width-400 class="foo" id="bar" %}
+```
+
+通过此种方法，可设置更具相关性的 `alt` 属性，来覆写自动从图片标题生成的那个`alt`值。在必要的情况下，图片的 `src`、`width`及`height`都可以进行覆写。
+
+### 2. 从图片生成图片模板变量，从而访问其诸多属性
+
+**Generating the image "as foo" to access individual properties**
+
+```html
+{% image page.photo width-400 as tmp_photo %}
+
+<img src="{{ tmp_photo.url }}" width="{{ tmp_photo.width }}" 
+    height="{{ tmp_photo.height }}" alt="{{ tmp_photo.alt }}" class="my-custom-class" />
+```
+
+此种语法将所采用的图片转写（the underlying image Redition, `tmp_photo`），暴露给开发者。而“转写”则包含了所请求的、使用调整规则对图片进行格式化的特定信息，也就是尺寸与图片的源URL。
+
+在站点使用 `AstractImage` 定义了一种定制图片模型时，那么添加到某个图片的所有额外字段（比如版权所有者），都 **不会** 包含在转写中。
+
+因此就要将一个 `author` 字段，加入到上面示例中的 `AbstractImage`，而通过`{{ page.photo.author }}`，而非`{{ tmp_photo.author }}` 来访问该字段。
+
+（由于转写图片与其父图片在数据库中的链接的原因，也 **可** 以`{{ tmp_photo.image.author }}`来访问该字段，但这样降低了代码的可读性）
+
+> **注意** 图片用于`img`元素 `src` 属性的对象属性，实际上是`image.url`，而非`image.src`。
+
+
+## 关于 `attrs` 捷径
+
+**The `attrs` shortcut**
+
+也可使用`attrs` 属性，作为一并输出`src`、`width`、`height`与`alt`等属性的快捷方式：
+
+```html
+<img {{ tmp_photo.attrs }} class="my-custom-class" />
+```
+
+## 嵌入到富文本中的图片
+
+以上的信息，与经由模型中定义的、特定于图片的字段有关。然而图片还可以通过页面编辑器，嵌入到富文本中的任意位置（参考[符文布（HTML）](advanced_topics/customisation/page_editing_interface.html#rich-text)）。
+
+嵌入到符文布中的图片，就不能由模板开发者所轻易控制到了。对于这样的图片，没有可供处理的图片对象，因此不能使用`{{ image }}`模板标签。而是由站点编辑，在要文本编辑框中插入图片的地方，从一些图片“格式”中选取图片。
+
+Wagtail带有三种预定义的图片格式，但开发者可以Python方式，定义更多的图片格式。这三种格式如下：
+
++ `Full width`
+    
+    该格式使用`width-800`创建一个图片的撰写，并赋予了该格式下`<img>`标签 `full-width` 的CSS类
+
++ `Left-aligned`
+
+    该格式使用`width-500`创建一个图片的转写，并赋予了该格式下`<img>`标签 `left` 的CSS类
+
++ `Right-aligned`
+    
+
+    该格式使用`width-500`创建一个图片的撰写，并赋予了该格式下`<img>`标签 `right` 的CSS类
+
+> **注意** 所添加到图片的CSS类， **并未** 相应样式表，或内联样式与其对应。比如默认 `left` 类就不会生效。开发者需要将这些类加入到他们的前端 CSS文件中，以准确地定义他们想要`left`、`right`或`full-width`意味着什么。
+
+有关更多有关图片格式的信息，包括如何建立自己的图片格式，请参阅[富文本中的图片格式](advanced_topics/customisation/page_editing_interface.html#rich-text-image-formats)。
+
+
+## 输出图片的格式
+
+在对图片加以处理时，Wagtail可能会自动地改变某些图片的格式：
+
++ PNG与JPEG的图片不会改变格式
++ 不带有动画的GIF图片，被装换成PNG格式
++ BMP的图片，被转换成PNG格式
+
+也可通过在调整规则之后，使用`format`过滤器，在每个图片基础上，覆写输出格式的设定。
+
+比如使用`format-jpeg`来令到`image`标签总是将图片转换成JPEG:
+
+```html
+{% image page.photo width-400 format-jpeg %}
+```
+
+也可使用`format-png`或`format-gif`。
+
+
+## 图片背景色
+
+PNG与GIF图片两种格式，都支持透明，但在打算将图片转换成JPEG格式时，透明部分就需要使用某种固定的背景色来替换。
+
+默认下Wagtail会将背景色设为白色。但如果白色背景不能满足设计是，可使用`bgcolor`过滤器，指定某种颜色。
+
+此过滤器仅取一个参数，为CSS的3位或6位的十六进制代码，表示想要使用的颜色：
+
+```html
+{# 将图片背景色设为黑色 #}
+{% image page.photo width-400 bgcolor-000 format-jpeg %}
+```
+
+## JPEG图片的质量
+
+Wagtail的JPEG图片质量默认设置为了 `85`（已经相当高了）。对此可以全局地修改或基于各个标签进行修改。
+
+### 全局修改JPEG图片质量
+
+在 `settings.py`中使用`WAGTAILIMAGES_JPEG_QUALITY`设置，来改变全局默认JPEG质量：
+
+```python
+# settings.py
+
+# 生成低质量但更小的图片
+WAGTAILIMAGES_JPEG_QUALITY = 40
+```
+
+请注意此种修改不会影响所有先前已经生成的图片，因此可能要删除所有图片的转写，从而以新的设置重新生成这些图片转写。而这可以从Django的命令行完成：
+
+```bash
+# 如使用了其他定制的图片转写模型，那么就要使用该图片转写模型
+>>> from wagtail.images.models Rendition
+>>> Rendition.objects.all().delete()
+```
+
+### 以各个标签进行修改
+
+通过使用`jpegquality`过滤器，也可在单个标签基础上，有着不同的JPEG质量。这样总是会覆写默认设置：
+
+```html
+{% image page.photo width-400 jpegquality-40 %}
+```
+
+请注意这不会在PNG或GIF文件上生效。在想要所有文件都成为低质量，就要将该过滤器与`format-jpeg`一起使用（这强制将所有图片，输出为JPEG格式）。
+
+```html
+{% image page.photo width-400 format-jpeg jpegquality-40 %}
+```
+
+## 以Python方式生成图片的转写
+
+上面提到所有的图片转换，都可以直接以Python代码方式使用。请参阅[以Python方式生成图片](advanced_topics/images/renditions.html#image-renditions)。

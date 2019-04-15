@@ -1,6 +1,6 @@
 # 第一个Wagtail站点
 
-> **注意** 此教程讲的是有关建立一个全新Wagtail项目的内容。如要将Wagtail加入到某个既有Django项目，请参考[将Wagtail集成到Django项目](integrating_into_django.md)。
+> **注意** 此教程讲的是有关建立一个全新Wagtail项目的内容。如要将Wagtail加入到某个既有Django项目，请参考[将Wagtail集成到Django项目](integrating_into_django.html)。
 
 1. 安装 Wagtail 与其依赖：
 
@@ -79,7 +79,7 @@ class HomePage(Page):
     ]
 ```
 
-`body` 被定义为 `RichTextField`，一种特殊的 Wagtail 字段。当然也可以使用任意的 [Django 核心字段](https://docs.djangoproject.com/en/stable/ref/models/fields/)。`content_panels` 定义了功能及编辑接口的布局（`content_panels` define the capatibilities and the layout of the editing interface）。请参考更多有关 [创建页面模型](topics/pages.md)。
+`body` 被定义为 `RichTextField`，一种特殊的 Wagtail 字段。当然也可以使用任意的 [Django 核心字段](https://docs.djangoproject.com/en/stable/ref/models/fields/)。`content_panels` 定义了功能及编辑接口的布局（`content_panels` define the capatibilities and the layout of the editing interface）。请参考更多有关 [创建页面模型](topics/pages.html)。
 
 此时运行 `./manage.py makemigrations`，接着 `./manage.py migrate` 命令，来用模型改变对数据库作出更新。在每次修改了模型定义时，都 **必须** 运行这两个命令。
 
@@ -110,7 +110,7 @@ class HomePage(Page):
 
 **Wagtail template tags**
 
-Wagtail提供了一些 [模板标签与过滤器](topics/writing_templates.md#template_tags_and_filters)，通过在模板文件顶部包含 `{% load wagtailcore_tags %}`，装入这些标签与过滤器。
+Wagtail提供了一些 [模板标签与过滤器](topics/writing_templates.html#template_tags_and_filters)，通过在模板文件顶部包含 `{% load wagtailcore_tags %}`，装入这些标签与过滤器。
 
 在本教程中，将用到 `richtext` 过滤器，来将某个 `RichTextField` 字段中的内容进行转写与打印出来（to escape and print the contents of a `RichTextField`）。
 
@@ -264,7 +264,7 @@ Wagtail将给予你对不同父内容类型下，可建立何种内容的完全�
 
 **Parents and Children**
 
-在Wagtail中进行的大部分工作，都是围绕由众多节点与叶子所构成的“树”结构的层次概念开展的（参见[理论](reference/pages/theory.md)，Much of the work you'll be doing in Wagtail revolves around the concept of hierarchical "tree" structures consisting of nodes and leaves）。在本例中，`BlogIndexPage`是一个“节点”，同时单个的`BlogPage`实例，就是“叶子”了。
+在Wagtail中进行的大部分工作，都是围绕由众多节点与叶子所构成的“树”结构的层次概念开展的（参见[理论](reference/pages/theory.html)，Much of the work you'll be doing in Wagtail revolves around the concept of hierarchical "tree" structures consisting of nodes and leaves）。在本例中，`BlogIndexPage`是一个“节点”，同时单个的`BlogPage`实例，就是“叶子”了。
 
 这里再来从另一个角度看看`blog_index_page.html`的代码：
 
@@ -313,7 +313,7 @@ somepage.get_descenants()
 somepage.get_siblings()
 ```
 
-有关此方面的更多信息，请参阅：[页面的QuerySet参考](reference/pages/queryset_reference.md)
+有关此方面的更多信息，请参阅：[页面的QuerySet参考](reference/pages/queryset_reference.html)
 
 
 ## 覆写上下文
@@ -453,7 +453,7 @@ class BlogPageGalleryImage(Orderable):
 {% endblock %}
 ```
 
-这里使用 `{% image %}` 标签（此标签存在于`wagtailimages_tags`库中，在该模板顶部有导入该库），来将某个`<img>`元素，以`file-320x240`为参数而表明该图片需要缩放及裁剪，以填充到一个`320x240`的矩形中，而进行插入。有关在模板中图片的使用的更多信息，请参阅[文档](topics/images.md)。
+这里使用 `{% image %}` 标签（此标签存在于`wagtailimages_tags`库中，在该模板顶部有导入该库），来将某个`<img>`元素，以`file-320x240`为参数而表明该图片需要缩放及裁剪，以填充到一个`320x240`的矩形中，而进行插入。有关在模板中图片的使用的更多信息，请参阅[文档](topics/images.html)。
 
 ![插入了图片集的博客文章页面](images/tutorial_6.jpg)
 
@@ -815,6 +815,6 @@ class BlogPage(Page):
 
 ## 下一步
 
-+ 阅读Wagtail [使用手册](topics/index.md) 以及 [参考](reference/index.md) 文档
-+ 学习如何使用 [StreamField](topics/streamfield.md) 来创建自由格式的页面内容
-+ 浏览 [高级特性](advanced_topics/index.md) 部分并阅读 [第三方教程](advanced_topics/third-party_tutorials.md)
++ 阅读Wagtail [使用手册](topics/index.html) 以及 [参考](reference/index.html) 文档
++ 学习如何使用 [StreamField](topics/streamfield.html) 来创建自由格式的页面内容
++ 浏览 [高级特性](advanced_topics/index.html) 部分并阅读 [第三方教程](advanced_topics/third-party_tutorials.html)

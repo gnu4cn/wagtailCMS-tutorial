@@ -34,7 +34,7 @@ $ pip install wagtail
 $ wagtail start demo
 ```
 
-这将基于一个包含了满足起步所有需要的模板，而建立一个新的文件夹 `demo`。更多有关该模板的信息，请移步 [这里](getting_started/project_template.md)。
+这将基于一个包含了满足起步所有需要的模板，而建立一个新的文件夹 `demo`。更多有关该模板的信息，请移步 [这里](getting_started/project_template.html)。
 
 此时在 `demo` 文件夹中，只要运行一下对于所有Django项目来说都需要的必要几步：
 
@@ -47,9 +47,9 @@ $ ./manage.py runserver
 
 现在就可以在`http://localhost:8000`访问到该站点了，同时在`http://localhost:8000/admin`出可以访问到管理后端。
 
-这些步骤建立起来一个新的单机化的Wagtail项目。如要将Wagtail加入到某个既有的Django项目，则请参阅[将Wagtail集成到Django项目中](getting_started/integrating_into_django.md)。
+这些步骤建立起来一个新的单机化的Wagtail项目。如要将Wagtail加入到某个既有的Django项目，则请参阅[将Wagtail集成到Django项目中](getting_started/integrating_into_django.html)。
 
 有一些可选`pip`包没有包含到默认安装，但推荐使用他们来提高性能或赋予Wagtail某些特性，包括：
 
-+ [Elasticsearch](advanced_topics/performance.md)
-+ [特性发现](advanced_topics/images/feature_detection.md)
++ [Elasticsearch](advanced_topics/performance.html)
++ [特性发现](advanced_topics/images/feature_detection.html)
