@@ -3,7 +3,7 @@
 Wagtail提供了全面且可扩展的搜索接口。此外，其还经由“站点编辑精选（Editor's Picks）”方式，提供提升搜索结果的方法。Wagtail还将一些有关通过搜索接口进行的查询的、简单统计数据收集了起来。
 
 
-+ [建立索引](#indexing.html)
++ [建立索引](indexing.html)
 
     - [更新索引](indexing.html#updating-the-index)
     - [对额外字段进行索引](indexing.html#indexing-extra-fields)
