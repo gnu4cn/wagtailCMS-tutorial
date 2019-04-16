@@ -38,14 +38,14 @@ Wagtail提供了全面且可扩展的搜索接口。此外，其还经由“站�
 
 Wagtail提供了用于在模型上完成搜索的一个API。同时还可以在Django QuerySets上进行搜索查询。
 
-请参阅[进行搜索](searching.html)。
+请参阅[进行搜索](#searching)。
 
 
 ## 关于后端
 
 Wagtail提供了为搜索索引的存储与完成搜索查询提供了三种后端：Elasticsearch、数据库，以及 PostgreSQL（需要Django >= 1.10）。也可运行自己的搜索后端。
 
-请参阅 [关于搜索后端](backends.html)。
+请参阅 [关于搜索后端](#backends)。
 
 <a name="indexing"></a>
 # 索引的建立
@@ -149,3 +149,93 @@ class Book(models.Model, index.Indexed):
     ]
 ```
 
+### `index.RelatedFields`上的过滤
+
+使用`QuerySet`编程接口在`index.RelatedFields`中的所有`index.FilterFields`上进行过滤，都是不可能的。不过这些字段既然有被索引起来，那么就有可能通过手动查询ElasticSearch来用到他们。
+
+Wagtail计划在未来的发行中，实现经由`QuerySet`在`index.RelatedFields`上的过滤。
+
+
+## 对可调用及其他属性的索引
+
+**Indexing callables and other attributes**
+
+> **注意** [数据库后端（默认）](#backends-database) 不支持此特性。
+
+搜索/过滤器字段无需是Django模型字段。他们还可以是模型类的方法或属性。
+
+此特性的一种用处，是对那些Django自动创建的、带有选项的字段的`get_*_display`方法的索引。
+
+```python
+from wagtail.search import index
+
+class EventPage(Page):
+
+    IS_PRIVATE_CHOICES = (
+        (False, "公开的"),
+        (False, "私有的"),
+    )
+
+    is_private = models.BooleanField(choices=IS_PRIVATE_CHOICES)
+
+    search_fields = Page.search_fields + [
+        # 对人类可读的字符串进行索引，以进行搜索
+        index.SearchField('get_is_private_display'),
+
+        # 对逻辑值进行索引，以进行过滤
+        index.FilterField('is_private'),
+    ]
+```
+
+可调用属性还提供到一种对相关模型字段的索引方法（Callables also provide a way to index fields from related models）。在[内联面板与模型集群](reference/pages.html#panels-inline-panels)的示例中，就是通过相关链接的标题，来对各个`BookPage`进行索引的。
+
+```python
+class BookPage(Page):
+    
+    # ...
+
+    def get_related_link_titles(self):
+        
+        # 获取到标题清单，并将他们级联起来
+        return '\n'.join(self.related_links.all().values_list('name', flat=True))
+
+    search_fields = Page.search_fields + [
+        # ...
+        index.SearchField('get_realted_link_titles'),
+    ]
+```
+
+<a name="indexing-custom-models"></a>
+## 对定制模型进行索引
+
+所有Django模型，都可以被索引与搜索。
+
+要实现这一点，就要从`index.Indexed`进行继承，并将一些`search_fields`加入到该模型。
+
+```python
+from wagtail.search import index
+
+class Book(index.Indexed, models.Model):
+    title = models.CharField(max_length=255)
+    genre = models.CharField(max_length=255, choices=GENRE_CHOICES)
+    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    published_date = models.DateTimeField()
+
+    search_fields = [
+        index.SearchField('title', partial_match=True, boost=10),
+        index.SearchField('get_genre_display'),
+
+        index.FilterField('genre'),
+        index.FilterField('author'),
+        index.FilterField('published_date'),
+    ]
+
+# 因为此模型在其QuerySet中并没有一个搜索方法，因此就必须直接在后端调用搜索
+>>> from wagtail.search.backends import get_search_backend
+>>> s = get_search_backend()
+
+# 运行一次对 Roald Dohl 所写的书的搜索
+>>> roald_dahl = Author.objects.get(name="Roald Dahl")
+>>> s.search("chocolate factory", Book.objects.filter(author=roald_dahl))
+[<Book: Charlie and the chocolate factory>]
+```
