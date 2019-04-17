@@ -453,34 +453,34 @@ def search(request):
 以下是一个与该试图一同工作的模板：
 
 {% raw %}
-{% extends "base.html" %}
-{% load wagtailcore_tags %}
+    {% extends "base.html" %}
+    {% load wagtailcore_tags %}
 
-{% block title %}搜索{% endblock %}
+    {% block title %}搜索{% endblock %}
 
-{% block content %}
-    <form action="{% url 'search' %}" method="get">
-        <input type="text" name="query" value="{{ search_query }}" />
-        <input type="submit" value="搜索" />
-    </form>
+    {% block content %}
+        <form action="{% url 'search' %}" method="get">
+            <input type="text" name="query" value="{{ search_query }}" />
+            <input type="submit" value="搜索" />
+        </form>
 
-    {% if search_results %}
-        <ul>
-            {% for result in search_results %}
-                <li>
-                    <h4><a href="{% pageurl result %}">{{ result }}</a></h4>
-                    {% if result.search_description %}
-                        {{ result.search_description|safe }}
-                    {% endif %}
-                </li>
-            {% endfor %}
-        </ul>
-    {% elif search_query %}
-        未找到结果
-    {% else %}
-        请将搜索词条输入到搜索框中
-    {% endif %}
-{% endblock %}
+        {% if search_results %}
+            <ul>
+                {% for result in search_results %}
+                    <li>
+                        <h4><a href="{% pageurl result %}">{{ result }}</a></h4>
+                        {% if result.search_description %}
+                            {{ result.search_description|safe }}
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% elif search_query %}
+            未找到结果
+        {% else %}
+            请将搜索词条输入到搜索框中
+        {% endif %}
+    {% endblock %}
 {% endraw %}
 
 
