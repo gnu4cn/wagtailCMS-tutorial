@@ -14,3 +14,4 @@
     * [编写模板](topics/writing_templates.md)
     * [在模板中使用图片](topics/images.md)
     * [搜索功能](topics/search.md)
+    * [内容片段](topics/snippets.md)
