@@ -314,4 +314,168 @@ class LatestPostsStaticBlock(blocks.StaticBlock):
 
 **Structural block types**
 
+除了上面的这些基本块类型外，定义一些由子块所构成的新的块类型也是可行的：比如由姓、名与照片构成的`person`块，或由不限制数量的图片块构成的一个`carousel`块。这类结构可以任意深度进行嵌套，从而令到某个结构包含块清单，或者结构的清单。
+
+### `StructBlock`
+
+`wagtail.core.blocks.StructBlock`
+
+一个由在一起显示的子块的固定组别所构成的块。取一个`(name, block_definition)`的元组，作为其首个参数：
+
+```python
+('person', blocks.StructBlock([
+    ('first_name', blocks.CharBlock()),
+    ('surname', blocks.CharBlock()),
+    ('photo', ImageChooserBlock(required=False)),
+    ('biography', blocks.RichTextBlock()),
+], icon='user'))
+```
+
+此外，子块清单也可在某个`StructBlock`的子类中加以提供：
+
+```python
+class PersonBlock(blocks.StructBlock):
+
+    first_name = blocks.CharBlock()
+    surname = blocks.CharBlock()
+    photo = ImageChooserBlock(required=False)
+    biography = blocks.RichTextBlock()
+
+    class Meta:
+        icon = 'user'
+```
+
+该`Meta`类支持属性`default`、`label`、`icon`与`template`，这些属性与将他们传递给该块的构造器时，有着同样的意义。
+
+上面的代码将`PersonBlock()`定义为了一个可在模型定义中想重用多少次都可以的块类型。
+
+```python
+body = StreamField([
+    ('heading', blocks.CharBlock(classname="full title")),
+    ('paragraph', blocks.RichTextBlock()),
+    ('image', ImageChooserBlock()),
+    ('author', PersonBlock()),
+])
+```
+
+更多有关对页面编辑器中的`StrucBlock`的显示进行定制的选项，请参阅[定制`StructBlock`的编辑界面](#custom-editing-interfaces-for-structblock)。
+
+同时还可对如何将`StructBlock`的值加以准备，以在模板中使用而进行定制 -- 请参阅[定制`StructBlock`的值类](#custom-value-class-for-structblock)。
+
+### `ListBlock`
+
+`wagtail.core.blocks.ListBlock`
+
+由许多同样类型的子块所构成的块。站点编辑可将不限数量的子块添加进来，并对其进行重新排序与删除。取子块的定义作为他的首个参数：
+
+```python
+('ingredients_list', blocks.ListBlock(
+    blocks.CharBlock(label='营养成分')
+))
+```
+
+可将所有块类型作为子块的类型，包括结构化块类型：
+
+```python
+('ingredients_list', blocks.ListBlock(
+    blocks.StructBlock([
+        ('ingredient', blocks.CharBlock()),
+        ('amount', blocks.CharBlock(required=False)),
+    ])
+))
+```
+
+
+### `StreamBlock`
+
+`wagtail.core.blocks.StreamBlock`
+
+一种由一系列不同类型的子块构成的快，这些子块可混合在一起，并依意愿进行重新排序。作为`StreamField`本身的整体机制而进行使用，也可在其他结构化块类型加以嵌套或使用。将一个`(name, block_definition)`元组清单，作为其首个参数：
+
+```python
+('carousel', blocks.StreamField([
+    ('image', ImageChooserBlock()),
+    ('quotation', blocks.StuctBlock([
+        ('text', blocks.TextBlock()),
+        ('author', blocks.CharBlock()),
+    ])),
+    ('video', EmbedBlock()),
+], icon='cogs'))
+```
+
+与`StructBlock`一样，子块清单也可作为`StreamBlock`的子类加以提供：
+
+```python
+class CarouselBlock(blocks.StreamBlock):
+
+    image = blocks.ImageChooserBlock()
+    quotation = blocks.StructBlock([
+        ('text', blocks.TextBlock()),
+        ('author', blocks.CharBlock()),
+    ])
+    video = EmbedBlock()
+
+    class Meta:
+        
+        icon = 'cogs'
+```
+
+因为`StreamField`在块类型清单处接受了一个`StreamBlock`的实例作为参数，这就令到在不重复定义的情况下，重复使用一套通用的块类型成为可能（since `StreamField` accepts an instance of `StreamBlock` as a parameter, in place of a list block types, this makes it possible to re-use a common set of block types without repeating definitions）：
+
+```python
+class HomePage(Page):
+
+    carousel = StreamField(CarouselBlock(max_num=10, block_counts={'video': {'max_num': 2}}))
+```
+
+`StreamBlock`接受以下选项，作为关键字参数或`Meta`的属性：
+
++ `required`（默认：`True`）
+
+    在为`True`时，就要至少提供一个子块。这在将`StreamBlock`作为某个`StreamField`的顶级块使用时被忽略；在此情况下，该`StreamField`的`blank`属性优先。
+
++ `min_num`
+
+    该`StreamBlock`至少应有的子块数量。
+
++ `max_num`
+
+    该`StreamBlock`最多应有的子快数量。
+
++ `block_counts`
+
+    指定各个子块类型下最小与最大数量，是以子块名称到可选的`min_num`与`max_num`字典的映射字典。
+
+<a name="personblock-example"></a>
+## 示例`PersonBlock`
+
+本示例对如何将上面讲到的基本块类型，结合到一个更为复杂的基于`StructBlock`的块类型中：
+
+```python
+from wagtail.core import blocks
+
+class PersonBlock(blocks.StructBlock):
+
+    name = blocks.CharBlock()
+    height = blocks.DecimalBlock()
+    age = blocks.IntegerBlock()
+    email = blocks.EmailBlock()
+
+    class Meta:
+        
+        template = 'blocks/person_block.html'
+```
+
+## 模板的渲染
+
+`StreamField`特性为流式内容作为整体的HTML表示，也为各个单独的块提供了HTML表示（`StreamField` provides an HTML representation for the stream content as a whole, as well as for each individual block）。而要将此HTML包含进页面中，就要使用`{% include_block %}` 标签。
+
+{% raw %}
+    {% load wagtailcore_tags %}
+
+    ...
+
+    {% include_block page.body %}
+{% endraw %}
+
 
