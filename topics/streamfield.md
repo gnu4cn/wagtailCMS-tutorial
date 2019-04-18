@@ -478,4 +478,34 @@ class PersonBlock(blocks.StructBlock):
     {% include_block page.body %}
 {% endraw %}
 
+在默认的渲染中，该流的各个块是包围在`<div class="block-my_block_name">`元素中的（其中`my_block_name`就是在该`StreamField`定义中所给的块名称）。若要提供自己的HTML标记，可对该字段的值进行迭代，并依次在各个块调用`{% include_block %}`：
+
+{% raw %}
+    ...
+
+    <article>
+        {% for block in page.body %}
+            <section>{% include_block block %}</section>
+        {% endfor %}
+    </article>
+{% endraw %}
+
+为实现对特定块类型渲染的更多控制，各个块对象都提供了`block_type`与`value`属性：
+
+{% raw %}
+    ...
+
+    <article>
+        {% for block in page.body %}
+            {% if block.block_type == 'heading' %}
+                <h1>{{ block.value }}</h1>
+            {% else %}
+                <section class="block-{{ block.block_type }}">
+                    {% include_block block %}
+                </section>
+            {% endif %}
+        {% endfor %}
+    </article>
+{% endraw %}
+
 
