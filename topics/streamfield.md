@@ -508,4 +508,175 @@ class PersonBlock(blocks.StructBlock):
     </article>
 {% endraw %}
 
+默认各个块都是使用简单的、最小的HTML标记，或完全不使用HTML进行渲染的。比如`CharBlock`就是作为普通文本进行渲染的，而`ListBlock`则会将其子块输出到一个`<ul>`包装器中。如要用定制的HTML渲染方式来覆写此行为，可将一个`template`参数传递给该块，从而给到一个要进行渲染的模板文件名。这样做对于一些从`StructBlock`派生的定制块类型，有为有用：
+
+```python
+('person', blocks.StructBlock(
+    [
+        ('first_name', blocks.CharBlock()),
+        ('surname', blocks.CharBlock()),
+        ('photo', ImageChooserBlock()),
+        ('biography', blocks.RichTextBlock()),
+    ],
+    tempalte='myapp/blocks/person.html',
+    icon='user'
+))
+```
+
+或在将其定义为`StructBlock`的子类时：
+
+```python
+class PersonBlock(blocks.StructBlock):
+    first_name = blocks.CharBlock()
+    surname = blocks.CharBlock()
+    photo = ImageChooserBlock(required=False)
+    biography = blocks.RichTextBlock()
+
+    class Meta:
+        template = 'myapp/blocks/person.html'
+        icon = 'user'
+```
+
+在模板中，块的值可以变量`value`进行访问：
+
+{% raw %}
+    {% load wagtailimages_tags %}
+
+    <div class="person">
+        {% image value.photo width-400 %}
+        <h2>{{ value.first_name }} {{ value.surname }}</h2>
+        {{ value.biography }}
+    </div>
+{% endraw %}
+
+因为`first_name`、`surname`、`photo`与`biography`都是以其自己地位作为块进行定义的，所以这也可写为下面这样：
+
+{% raw %}
+    {% load wagtailimages_tags wagtailcore_tags %}
+
+    <div>
+        {% image value.photo width-400 %}
+        <h2>{% include_block value.first_name %} {% include_block value.surname %}</h2>
+        {% include_block value.biography %}
+    </div>
+{% endraw %}
+
+
+`{{ myblock }}` 的写法大致与 `{% include_block my_block %}`等价，但短的形式限制更多，因为其没有将来自所调用模板的变量，比如`request`或`page`，加以传递；因为这个原因，只建议在一些不会渲染其自己的HTML的简单值上使用这种短的形式。比如在`PersonBlock`使用了如下模板时：
+
+{% raw %}
+    {% load wagtailiamges_tags %}
+
+    <div class="person">
+        {% image value.photo width-400 %}
+        <h2>{{ value.first_name }} {{ value.surname }}</h2>
+
+        {% if request.user.is_authenticated %}
+            <a href="#">联系此人</a>
+        {% endif %}
+
+        {{ value.biography }}
+    </div>
+{% endraw %}
+
+那么这里的`request.user.is_authenticated`测试，在经由`{{ ... }}`这样的标签进行渲染时便不会工作：
+
+{% raw %}
+    {# 错误的写法： #}
+
+    {% for block in page.body %}
+        {% if block.block_type == 'person' %}
+            <div>{{ block }}</div>
+        {% endif %}
+    {% endfor %}
+
+    {# 正确的写法： #}
+
+    {% for block in page.body %}
+        {% if block.block_type == 'person' %}
+            <div>{% include_block block %}</div>
+        {% endif %}
+    {% endfor %}
+{% endraw %}
+
+与Django的`{% include %}`标签类似，`{% include_block %}` 也允许通过`{% include_block with foo="bar" %}`语法，将额外变量传递给所包含的模板：
+
+{% raw %}
+    {# 在页面模板中： #}
+
+    {% for block in page.body %}
+        {% if block.block_type == 'person' %}
+            {% include_block block with classname="important" %}
+        {% endif %}
+    {% endfor %}
+
+    {# 在PersonBlock的模板中： #}
+    <div class="{{ classname }}"></div>
+{% endraw %}
+
+
+还支持 `{% include_block my_block with foo="bar" only %}`语法，以指明除了来自父模板的`foo`变量外，无其他变量传递给子模板。
+
+除了从父模板进行变量传递外，块子类也可通过对`get_context`方法进行重写，传递他们自己额外的模板变量：
+
+```python
+import datetime
+
+class EventBlock(blocks.StructBlock):
+
+    title = blocks.CharBlock()
+    date = blocks.DateBlock()
+
+    def get_context(self, value, parent_context=None):
+        context = super().get_context(value, parent_context=parent_context)
+        context['is_happening_today'] = (value['date'] == datetime.date.today())
+        return context
+
+    class Meta:
+        template = 'myapp/blocks/event.html'
+```
+
+在此示例中：变量`is_happening_today`将在该块的模板中成为可用。在该块是经由某个`{% include_block%}`标签进行渲染时，`parent_context`关键字参数会是可用的，且他将是一个从调用该块的模板中传递过来的变量的字典。
+
+## `BoundBlocks`与值
+
+所有块类型，而不仅是`StructBlock`，都接受一个用于确定他们将如何在某个页面上进行渲染的`template`参数。但对于那些处理基本Python数据类型的块，比如`CharBlock`与`IntegerBlock`，在于何处模板生效上有着一些局限，因为这些内建类型（`str`、`int`等等）无法就他们的模板渲染进行“干预”。作为此问题的一个示例，请思考一下的块定义：
+
+```python
+class HeadingBlock(blocks.CharBlock):
+    class Meta:
+        template = 'blocks/heading.html'
+```
+
+其中`block/heading.html`的构成是：
+
+```html
+<h1>{{ value }}</h1>
+```
+
+这就给到一个与普通文本字段一样表现的块，但在其被渲染时，是将其输出封装在`h1`标签中的：
+
+```python
+class BlogPage(Page):
+    body = StreamField([
+        # ...
+        ('heading', HeadingBlock()),
+        # ...
+    ])
+```
+
+{% raw %}
+    {% load wagtailcore_tags %}
+
+    {% for block in page.body %}
+        {% if block.block_type == 'heading' %}
+            {% include_block block %} {# 此块将输出他自己的 <h1>...</h1> 标签。 #}
+        {% endif %}
+    {% endfor %}
+{% endraw %}
+
+此种安排 -- 一个期望表示普通文本字符串，但在某个模板上有着其自己的定制HTML表示 -- 通常将是以Python达成的非常糟糕的事，不过在这里将奏效，因为在对某个`StreamField`进行迭代是所获取到的条目，并非这些块的真实“原生”值。相反，每个条目都是作为一个`BoundBlock` -- 一个表示值与值的块定义的对，的实例而加以返回的。`BoundBlock`通过对块定义保持跟踪，而始终知道要进行渲染的模板。而要获取到底层值 -- 在本例中，就是标题的文本内容 -- 就需要访问`block.value`。实际上，如在页面中输出`{% include_block block.value %}`，将发现他是以普通文本进行渲染的，而不带有`<h1>`标签。
+
+（更为准确地说，在对某个`StreamField`进行迭代时，其所返回的条目，是`StreamChild`类的实例，`StreamChild`类提供了`block_type`与`value`两个属性）
+
 
