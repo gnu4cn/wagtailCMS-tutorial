@@ -866,5 +866,3 @@ class MyPage(Page):
         {% endfor %}
     </div>
 {% endraw %}
-
-
