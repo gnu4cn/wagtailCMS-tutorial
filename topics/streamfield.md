@@ -851,6 +851,7 @@ class MyPage(Page):
 此时所扩展的值类方法，就在模板中可用了：
 
 {% raw %}
+
     {% load watailcore_tags %}
     <ul>
         {% for link in page.quick_links %}
