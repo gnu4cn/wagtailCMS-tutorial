@@ -747,6 +747,8 @@ class EventBlock(blocks.StructBlock):
 {% endraw %}
 中那样），将获取到一系列的`BoundBlock`s。
 
+> "注" 这里如写成一行，将导致gitbook 无法构建，报出错误：`Template error: unexpected end of file`
+
 `2`. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
 
 `3`. 对`StructBlock`子块的访问（比如在`value.heading`中那样），将返回一个普通值；而要获取到`BoundBlock`的值，就要使用`value.bound_blocks.heading`语法。
