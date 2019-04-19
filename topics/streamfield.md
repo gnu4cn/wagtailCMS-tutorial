@@ -745,7 +745,7 @@ class EventBlock(blocks.StructBlock):
     
     {% for block in page.body %}
 {% endraw %}
-    中那样），将获取到一系列的`BoundBlock`s。
+中那样），将获取到一系列的`BoundBlock`s。
 
 2. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
 
