@@ -679,4 +679,192 @@ class BlogPage(Page):
 
 （更为准确地说，在对某个`StreamField`进行迭代时，其所返回的条目，是`StreamChild`类的实例，`StreamChild`类提供了`block_type`与`value`两个属性）
 
+有经验的Django开发者可能会发现，将这个与Django的表单框架中，表示表单字段值与其相应的表单字段定义对的`BoundField`类，进行比较而有所帮助，从而明白是怎样将值作为HTML表单字段进行渲染的。
+
+大多数时候，都无需担心这些内部细节问题；Wagtail将在期望使用模板渲染的任何地方，而进行模板渲染。不过在某些此种设想并不完整的情况下 --也就是说，在访问`ListBlock`或`StructBlock`的子块时。在这些情况下，就没有`BoundBlock`的封装器，进而其条目就无法依赖于获悉其自己的渲染模板。比如，请考虑以下设置，其中的`HeadingBlock`是`StructBlock`的一个子块：
+
+```python
+class EventBlock(blocks.StructBlock):
+    heading = HeadingBlock()
+    description = blocks.TextBlock()
+    # ...
+
+    class Meta:
+        template = 'blocks/event.html'
+```
+
+在 `blocks/event.html`:
+
+{% raw %}
+    {% load wagtailcore_tags %}
+    <div class="event {% if value.heading == "聚会！" %}lots-of-ballons{% endif %} ">
+        {% include_block value.bound_blocks.heading %}
+        - {% include_block value.description %}
+    </div>
+{% endraw %}
+
+在具体实践中，在`EventBlock`的模板中把`<h1>`标签显式地写出来，将更为自然且更具可读性：
+
+{% raw %}
+    <div class="event {% if value.heading == "聚会！"%}lots-of-balloons{% endif %}">
+        <h1>{{ value.heading }}</h1>
+        - {% include_block value.description %}
+{% endraw %}
+
+这种局限性并不存在于作为`StructBlock`子块的`StructBlock`与`StreamBlock`，因为Wagtail是将他们作为知悉其自己的渲染模板的复杂对象，就算在没有封装在一个`BoundBlock`中，而加以实现的。比如在一个`StructBlock`嵌套于另一个`StructBlock`中事：
+
+```python
+class EventBlock(blocks.StructBlock):
+    heading = HeadingBlock()
+    description = blocks.TextBlock()
+    guest_speaker = blocks.StructBlock([
+        ('first_name', blocks.CharBlock()),
+        ('surname', blocks.CharBlock()),
+        ('photo', ImageChooserBlock()),
+    ], template='blocks/speaker.html')
+```
+
+那么在`EventBlock`的模板中，将如预期的那样，从`blocks/speaker.html`拾取渲染模板。
+
+总的来说，`BoundBlock`s 与普通值之间的互动，遵循以下规则：
+
+1. 在对`StreamField`或`StreamBlock`的值进行迭代时（就像在`{% for block in page.body %}`中那样），将获取到一系列的`BoundBlock`s。
+
+2. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
+
+3. 对`StructBlock`子块的访问（比如在`value.heading`中那样），将返回一个普通值；而要获取到`BoundBlock`的值，就要使用`value.bound_blocks.heading`语法。
+
+4. `ListBlock`的值，是一个普通的Python清单；对`ListBlock`的迭代，将返回普通的子元素值。
+
+5. 与`BoundBlock`不同，`StructBlock`与`StreamBlock`的值，总是知道如何去渲染他们自己的模板，就算仅有着普通值。
+
+
+## 定制`StructBlock`的编辑界面
+
+要对呈现在页面编辑器中的`StructBlock`的样式进行定制，可为其指定一个`form_classname`的属性（既可以作为`StructBlock`构造器的一个关键字参数，也可放在某个子类的`Meta`中），以覆写`struct-block`这个默认值：
+
+```python
+class PersonBlock(blocks.StructBlock):
+    first_name = blocks.CharBlock()
+    surname = blocks.CharBlock()
+    photo = ImageChooserBlock()
+    biography = blocks.RichTextBlock()
+
+    class Meta:
+        icon = 'user'
+        form_classname = 'person-block struct-block'
+```
+
+此时便可为该块提供定制的CSS了，以该指定的CSS类名称为目标，通过 [`insert_editor_css`钩子](reference/hooks.html#insert-editor-css)。
+
+> **注意** Wagtail的编辑器样式机制，有着一些`struct-block`类及其他相关元素的内建样式。在制定了`form_classname`的值时，将覆写已经应用到`StructBlock`那些CSS类，因此必须记得要同时要指定`struct-block`CSS类。
+
+而对于那些需要修改HTML标记的更具扩展性的定制，则可在`Meta`中覆写`form_template`属性，以制定自己的模板路径。此种模板中支持以下这些变量：
+
++ `children`
+
+    所有构成该`StructBlock`的子块的一个`BoundBlock`s的`OrderedDict`；通常`StructBlock`指定的模板，将调用这些`OrderedDict`上的`render_form`方法。
+
++ `help_text`
+
+    如有制定`help_text`, 则为该块的帮助文本。
+
++ `classname`
+
+    以`form_classname`所传递的CSS类的名称（默认为`struct-block`）。
+
++ `block_definition`
+
+    定义此块的`StructBlock`实例。
+
++ `prefix`
+
+    该块实例的用在表单字段上的前缀，确保了在整个表单范围表单字段的唯一性。
+
+可通过覆写块的`get_form_context`方法，来加入一些额外的变量：
+
+```python
+class PersonBlock(blocks.StructBlock):
+
+    first_name = blocks.CharBlock()
+    surname = blocks.CharBlock()
+    photo = ImageChooserBlock()
+    biography = blocks.RichTextBlock()
+
+    def get_form_context(self, value, prefix='', errors=None):
+        context = super().get_form_context(value, prefix=prefix, errors=errors)
+        context['suggested_first_name'] = ['John', 'Paul', 'George', 'Ringo']
+        return context
+
+    class Meta:
+        icon = 'user'
+        form_template = 'myapp/block_forms/person.html'
+```
+
+## 对`StructBlock`的值类进行定制
+
+**Custom value class for `StructBlock`**
+
+可通过指定一个`value_class`的属性（即可作为`StructBlock`构造器的一个关键字参数，也可放在某个子类的`Meta`中），来对`StructBlock`子块的值如何加以准备，而实现对`StructBlock`值的可用方法的定制。
+
+而该`value_class`必须是`StructValue`基类的一个子类，所有额外方法，都可以从子块经由该块在`self`上的键（比如`self.get('my_block')`），访问到该子块的值。
+
+比如：
+
+```python
+from wagtail.core.models import Page
+from wagtail.core.blocks import (
+    CharBlock, PageChooserBlock, StructValue, StructBlock, TextBlock, URLBlock)
+
+class LinkStructValue(StructValue):
+    def url(self):
+        external_url = self.get('external_url')
+        page = self.get('page')
+        if external_url:
+            return external_url
+        elif page:
+            return page.url
+
+class QuickLinkBlock(StructBlock):
+    text = CharBlock(label='链接文本', required=True)
+    page = PageChoooserBlock(label='页面', required=False)
+    external_url = URLBlock(label='外部URL', required=False)
+
+    class Meta:
+        icon = 'site'
+        value_class = LinkStructValue
+
+class MyPage(Page):
+    quick_links = StreamField([('链接', QuickLinkBlock())], blank=True)
+    quotations = StreamField([('引用'， StructBlock([
+        ('quote', TextBlock(required=True)),
+        ('page', PageChooserBlock(required=False)),
+        ('external_url', URLBlock(required=False)),
+    ], icon='openquote', value_class=LinkStructValue))], blank=True)
+
+    content_panels = Page.content_panels + [
+        StreamFieldPanel('quick_links'),
+        StreamFieldPanel('quotations'),
+    ]
+```
+
+此时所扩展的值类方法，就在模板中可用了：
+
+{% raw %}
+    {% load watailcore_tags %}
+    <ul>
+        {% for link in page.quick_links %}
+            <li><a href="{{ link.value.url }}">{{ link.value.text }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <div>
+        {% for quotation in page.quotations %}
+            <blockquote cite="{{ quotation.value.url }}">
+                {{ quotation.value.quote }}
+            </blockquote>
+        {% endfor %}
+    </div>
+{% endraw %}
+
 
