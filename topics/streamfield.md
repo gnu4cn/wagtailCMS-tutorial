@@ -904,3 +904,52 @@ class IPAddressBlock(FieldBlock):
 __StreamField definitions within migrations__
 
 就如同Django中的所有模型字段一样，所有会对`StreamField`造成影响的对模型定义的修改，都将造就一个包含该字段定义的“冻结”副本的数据库迁移文件。因为一个`StreamField`定义比一个典型的模型定义更为复杂，所以就会存在来自导入到数据库迁移的项目的增加了可能性的定义 -- 而这就会在后期这些定义被移动或删除时，导致一些问题出现（as with any model field in Django, any changed to a model definition that affect a StreamField will result in a migration file that contains a 'frozen' copy of that field definition. Since a StreamField definition is more complex that a typical model field, there is an increased likelihood of definitions from your project being imported into the migration -- which would cause problems later on if those definitions are moved or deleted）。
+
+为消除此问题，`StructBlock`、`StreamBlock`以及`ChoiceBlock`都实现了额外的逻辑，以确保这些块的所有子类都被解构到`StructBlock`、`StreamBlock`以及`ChoiceBlock`的普通实例 -- 通过这种方式，数据库迁移避免了有着对定制类定义的任何引用。这之所以能做到的原因，在于这些块类型都提供了继承的标准模式，且他们知悉如何对遵循此模式的全部子类的块定义，进行重构。
+
+在多任何其他块类，比如`FieldBlock`进行子类化时，都将需要在项目的生命周期保留子类的定义，或者实现一个就类而论可完全地表达块的[定制结构方法](https://docs.djangoproject.com/en/stable/topics/migrations/#custom-deconstruct-method)，以确保子类存在。与此类似，在将某个`StructBlock`、`StreamBlock`、`ChoiceBlock`的子类定制到其不再能作为基本块类型所能表达的时候 -- 比如将额外参数添加到了构造器 -- 那么就需要提供自己的`deconstruct`方法了。
+
+### 将富文本字段迁移到`StreamField`
+
+__Migrating RichTextFields to StreamField__
+
+在将某个既有的`RichTextField`修改为`StreamField`，并如寻常那样创建并运行一个数据库迁移时，迁移将正确无误的完成，因为两种字段都在数据库中使用了一个文本列。但`StreamField`使用的是一个JSON来表示他的数据，因此现有的文本就需要使用一个数据迁移来进行转换，以令到其再度可以访问。那么`StreamField`就需要包含一个`RichTextBlock`作为其一个可用的块类型，以完成这种转换。随后该字段就可以通过创建一个新的数据库迁移（`./manage.py makemigration --empty myapp`），并将该迁移做如下编辑（在下面的示例中， `demo.BlogPage`模型的`body`字段，正被转换成一个带有名为`rich_text`的`RichTextBlock`的`StreamField`）：
+
+```python
+# -*- coding: utf-8 -*-
+from django.db import models, migration
+from wagtail.core.rich_text import RichText
+
+def convert_to_streamfield(apps, schema_editor):
+    BlogPage = apps.get_model("demo", "BlogPage")
+    for page in BlogPage.objects.all():
+        if page.body.raw_text and not page.body:
+            page.body = [('rich_text', RichText(page.body.raw_text))]
+            page.save()
+
+def convert_to_richtext(apps, schema_editor):
+    BlogPage = apps.get_model("demo", "BlogPage")
+    for page in BlogPage.objects.all()
+        if page.body.raw_text is None:
+            raw_text = ''.join([
+                child.value.source or child in page.body
+                if child.block_type == 'rich_text'
+            ])
+            page.body = raw_text
+            page.save()
+
+class Migration(migrations.Migration):
+    dependencies = [
+        # 保持之前生成的数据库迁移的依赖完整！
+        ('demo', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.RunPython(
+            convert_to_streamfield,
+            convert_to_richtext
+        ),
+    ]
+```
+
+
