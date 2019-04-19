@@ -739,7 +739,7 @@ class EventBlock(blocks.StructBlock):
 
 总的来说，`BoundBlock`s 与普通值之间的互动，遵循以下规则：
 
-1. 在对`StreamField`或`StreamBlock`的值进行迭代时（就像在
+`1`. 在对`StreamField`或`StreamBlock`的值进行迭代时（就像在
 
 {% raw %}
     
@@ -747,13 +747,13 @@ class EventBlock(blocks.StructBlock):
 {% endraw %}
 中那样），将获取到一系列的`BoundBlock`s。
 
-2. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
+`2`. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
 
-3. 对`StructBlock`子块的访问（比如在`value.heading`中那样），将返回一个普通值；而要获取到`BoundBlock`的值，就要使用`value.bound_blocks.heading`语法。
+`3`. 对`StructBlock`子块的访问（比如在`value.heading`中那样），将返回一个普通值；而要获取到`BoundBlock`的值，就要使用`value.bound_blocks.heading`语法。
 
-4. `ListBlock`的值，是一个普通的Python清单；对`ListBlock`的迭代，将返回普通的子元素值。
+`4`. `ListBlock`的值，是一个普通的Python清单；对`ListBlock`的迭代，将返回普通的子元素值。
 
-5. 与`BoundBlock`不同，`StructBlock`与`StreamBlock`的值，总是知道如何去渲染他们自己的模板，就算仅有着普通值。
+`5`. 与`BoundBlock`不同，`StructBlock`与`StreamBlock`的值，总是知道如何去渲染他们自己的模板，就算仅有着普通值。
 
 ## 定制`StructBlock`的编辑界面
 
