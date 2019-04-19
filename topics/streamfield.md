@@ -118,7 +118,7 @@ Wagtail提供了以下一些基本块类型：
 
 一个单行的小数输入，会验证该整数是一个有效的小数。接受关键字参数`required`（默认值：`True`）、`help_text`、`max_value`、`min_value`、`max_digits`与`decimal_places`。
 
-有关`DecimalBlock`的用例，请参阅[示例：`PersonBlock`](streamfield-continue.html#personblock-example)。
+有关`DecimalBlock`的用例，请参阅[示例：`PersonBlock`](#personblock-example)。
 
 ### `RegexBlock`
 
@@ -745,7 +745,7 @@ class EventBlock(blocks.StructBlock):
     
     {% for block in page.body %}
 {% endraw %}
-中那样），将获取到一系列的`BoundBlock`s。
+    中那样），将获取到一系列的`BoundBlock`s。
 
 2. 在有着一个`BoundBlock`实例时，可以`block.value`访问到其普通值。
 
