@@ -471,6 +471,7 @@ class PersonBlock(blocks.StructBlock):
 `StreamField`特性为流式内容作为整体的HTML表示，也为各个单独的块提供了HTML表示（`StreamField` provides an HTML representation for the stream content as a whole, as well as for each individual block）。而要将此HTML包含进页面中，就要使用`{% include_block %}` 标签。
 
 {% raw %}
+
     {% load wagtailcore_tags %}
 
     ...
@@ -540,6 +541,7 @@ class PersonBlock(blocks.StructBlock):
 在模板中，块的值可以变量`value`进行访问：
 
 {% raw %}
+
     {% load wagtailimages_tags %}
 
     <div class="person">
@@ -552,6 +554,7 @@ class PersonBlock(blocks.StructBlock):
 因为`first_name`、`surname`、`photo`与`biography`都是以其自己地位作为块进行定义的，所以这也可写为下面这样：
 
 {% raw %}
+
     {% load wagtailimages_tags wagtailcore_tags %}
 
     <div>
@@ -565,6 +568,7 @@ class PersonBlock(blocks.StructBlock):
 `{{ myblock }}` 的写法大致与 `{% include_block my_block %}`等价，但短的形式限制更多，因为其没有将来自所调用模板的变量，比如`request`或`page`，加以传递；因为这个原因，只建议在一些不会渲染其自己的HTML的简单值上使用这种短的形式。比如在`PersonBlock`使用了如下模板时：
 
 {% raw %}
+
     {% load wagtailiamges_tags %}
 
     <div class="person">
@@ -582,6 +586,7 @@ class PersonBlock(blocks.StructBlock):
 那么这里的`request.user.is_authenticated`测试，在经由`{{ ... }}`这样的标签进行渲染时便不会工作：
 
 {% raw %}
+
     {# 错误的写法： #}
 
     {% for block in page.body %}
@@ -602,6 +607,7 @@ class PersonBlock(blocks.StructBlock):
 与Django的`{% include %}`标签类似，`{% include_block %}` 也允许通过`{% include_block with foo="bar" %}`语法，将额外变量传递给所包含的模板：
 
 {% raw %}
+
     {# 在页面模板中： #}
 
     {% for block in page.body %}
@@ -666,6 +672,7 @@ class BlogPage(Page):
 ```
 
 {% raw %}
+
     {% load wagtailcore_tags %}
 
     {% for block in page.body %}
@@ -696,6 +703,7 @@ class EventBlock(blocks.StructBlock):
 在 `blocks/event.html`:
 
 {% raw %}
+
     {% load wagtailcore_tags %}
     <div class="event {% if value.heading == "聚会！" %}lots-of-ballons{% endif %} ">
         {% include_block value.bound_blocks.heading %}
@@ -706,6 +714,7 @@ class EventBlock(blocks.StructBlock):
 在具体实践中，在`EventBlock`的模板中把`<h1>`标签显式地写出来，将更为自然且更具可读性：
 
 {% raw %}
+
     <div class="event {% if value.heading == "聚会！"%}lots-of-balloons{% endif %}">
         <h1>{{ value.heading }}</h1>
         - {% include_block value.description %}
@@ -870,4 +879,3 @@ class MyPage(Page):
 ## 对块类型进行定制
 
 在需要实现某个定制UI，或要处理某种Wagtail内建的块类型所未提供（且无法作为既有字段的一个结构而构建出来）的数据类型，就要定义自己的定制块类型了。
-
