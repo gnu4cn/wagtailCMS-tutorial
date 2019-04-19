@@ -913,7 +913,7 @@ __StreamField definitions within migrations__
 
 __Migrating RichTextFields to StreamField__
 
-在将某个既有的`RichTextField`修改为`StreamField`，并如寻常那样创建并运行一个数据库迁移时，迁移将正确无误的完成，因为两种字段都在数据库中使用了一个文本列。但`StreamField`使用的是一个JSON来表示他的数据，因此现有的文本就需要使用一个数据迁移来进行转换，以令到其再度可以访问。那么`StreamField`就需要包含一个`RichTextBlock`作为其一个可用的块类型，以完成这种转换。随后该字段就可以通过创建一个新的数据库迁移（`./manage.py makemigration --empty myapp`），并将该迁移做如下编辑（在下面的示例中， `demo.BlogPage`模型的`body`字段，正被转换成一个带有名为`rich_text`的`RichTextBlock`的`StreamField`）：
+在将某个既有的`RichTextField`修改为`StreamField`，并如寻常那样创建并运行一个数据库迁移时，迁移将正确无误的完成，因为两种字段都在数据库中使用了一个文本列。但`StreamField`使用的是一个JSON来表示他的数据，因此现有的文本就需要使用一个数据迁移来进行转换，以令到其再度可以访问。那么`StreamField`就需要包含一个`RichTextBlock`作为其一个可用的块类型，以完成这种转换。随后该字段就可以通过创建一个新的数据库迁移（`./manage.py makemigration --empty myapp`），并将该迁移做如下编辑（在下面的示例中， `demo.BlogPage`模型的`body`字段，正被转换成一个带有名为`rich_text`的`RichTextBlock`的`StreamField`）, 而得以转换了：
 
 ```python
 # -*- coding: utf-8 -*-
@@ -952,4 +952,117 @@ class Migration(migrations.Migration):
     ]
 ```
 
+请注意上面的数据库迁移将只在以发布的页面对象上工作。如需对草稿页面与页面修订进行迁移，就要像下面的示例那样，编辑新的数据迁移：
 
+```python
+# -*- coding: utf-8 -*-
+
+import json
+
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db import migrations, models
+
+from wagtail.core.rich_text import RichText
+
+def page_to_streamfield(page):
+    changed = False
+
+    if page.body.raw_text and not page.body:
+        page.body = [('rich_text', {'rich_text': RichText(page.body.raw_text)})]
+        changed = True
+
+    return page, changed
+
+def pagerevision_to_streamfield(revision_data):
+    changed = False
+    body = revision_data.get('body')
+
+    if body:
+        try:
+            json.loads(body)
+        except:
+            ValueError:
+                revision_data('body') = json.dumps(
+                    [{
+                        "value": {"rich_text": body},
+                        "type": "rich_text"
+                    }],
+                    cls=DjangoJSONEncoder)
+                changed = True
+        else:
+            # 其已经是有效的JSON了，所以保留即可
+            pass
+    
+    return revision_data, changed    
+
+def page_to_richtext(page):
+    changed = False
+
+    if page.body.raw_text is None:
+        raw_text = ''.join([
+            child.value['rich_text'].source for child in page.body
+            if child.block_type == 'rich_text'
+        ])
+        page.body = raw_text
+        changed = True
+
+    return page, changed
+
+
+def pagerevision_to_richtext(revision_data):
+    changed = False
+    body = revision_data.get('body', 'definition non-JSON string')
+
+    if body:
+        try:
+            body_data = json.loads(body)
+        except ValudeError:
+            # 显然其不是一个 StreamField, 所以保留即可
+            pass
+        else:
+            raw_text = ''.join([
+                child['value']['rich_text'] for child in body_data
+                if child['type'] == 'rich_text'
+            ])
+            revision_data['body'] = raw_text
+            chaned = True
+
+    return revision_data, changed
+
+def convert(apps, schema_editor, page_converter, pagerevision_converter):
+    BlogPage = apps.get_model("demo", "BlogPage")
+    
+    for page in BlogPage.objects.all():
+        
+        page, changed = page_converter(page)
+        
+        if changed:
+            page.save()
+
+        for revision in page.revisions.all():
+            revision_data = json.loads(revision.content_json)
+            revision_data, changed = pagerevision_converter(revision_data)
+            if changed:
+                revision.content_json = json.dumps(revision_data, cls=DjangoJSONEncoder)
+                revison.save()
+
+def convert_to_streamfield(apps, schema_editor):
+    return convert(apps, schema_editor, page_to_streamfield, pagerevision_to_streamfield)
+
+def convert_to_richtext(apps, schema_editor):
+    return convert(apps, schema_editor, page_to_richtext, pagerevision_to_richtext)
+
+class Migration(migrations.Migration):
+    
+    dependencies = [
+        # 完整保留生成的数据库迁移的依赖行
+        ('demo', '0001_initial'),
+    ]
+
+    operations = [
+        migrations.RunPython(
+            convert_to_streamfield,
+            convert_to_richtext,
+        ),
+    ]
+```    
