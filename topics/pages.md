@@ -158,7 +158,7 @@ Wagtail还提供了一些他自身的字段类：
 
 页面编辑器可被深度定制，请参阅 [定制编辑接口](advanced_topics/customisation/page_editing_interface.md)。
 
-
+<a name="parent-page-subpage-type-rules"></a>
 ## 父页面/子页面的类型规则
 
 **Parent page / subpage type rules**
