@@ -11,6 +11,7 @@
 示例：
 
 {% raw %}
+
     {% load wagtailimages_tags %}
     ...
 
@@ -49,9 +50,10 @@
 
 （要取两个尺寸值）
 
-    {% raw %}
+{% raw %}
+
     {% image page.photo min-500x200 %}
-    {% endraw %}
+{% endraw %}
 
 **覆盖** 所给定的尺寸。
 
