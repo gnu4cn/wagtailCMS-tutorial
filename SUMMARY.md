@@ -15,5 +15,4 @@
     * [在模板中使用图片](topics/images.md)
     * [搜索功能](topics/search.md)
     * [内容片段](topics/snippets.md)
-    * [使用`StreamField`特性的自由格式页面内容（I）](topics/streamfield_part_I.md)
-    * [使用`StreamField`特性的自由格式页面内容（II）](topics/streamfield_part_II.md)
+    * [使用`StreamField`特性的自由格式页面内容](topics/streamfield.md)
