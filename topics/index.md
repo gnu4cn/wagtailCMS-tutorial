@@ -1,6 +1,7 @@
 # 使用手册
 
-+ [页面模型](pages.html)
+
++ [页面模型](pages.md)
 
     - Wagtail页面模型示例
     - 编写页面模型
@@ -9,7 +10,8 @@
     - 使用页面
     - 技巧
 
-+ [编写页面模型](writing_templates.html)
+
++ [编写页面模型](writing_templates.md)
 
     - 模板
     - 静态文件
@@ -17,7 +19,8 @@
     - Wagtail的用户栏
     - 在上线前通过预览来验证输出
 
-+ [在模板中使用图片](images.html)
+
++ [在模板中使用图片](images.md)
 
     - 经由`img`标签实现更多的控制
     - `attrs`捷径
@@ -26,16 +29,15 @@
     - 背景色
     - JPEG图片的质量
 
-+ 搜索功能
+
++ [搜索功能](search/index.md)
 
     - 建立索引
     - 搜索
     - 搜索的后端
-    - 建立索引
-    - 搜索
-    - 后端
 
-+ 内容块（Snippets）
+
++ [内容块（Snippets）](snippets.md)
 
     - 内容的模型
     - 在模板标签中包含内容块
@@ -43,7 +45,8 @@
     - 令到内容块可被搜索
     - 给内容块打上标签
 
-+ 使用`StreamField`特性得到格式自由的页面内容
+
++ [使用`StreamField`特性得到格式自由的页面内容](streamfield.md)
 
     - 使用`StreamField`
     - 基础的块类型
@@ -56,7 +59,8 @@
     - 定制的块类型
     - 数据库的迁移
 
-+ 权限
+
++ [权限](permissions.md)
 
     - 页面的权限
     - 图片/文档的权限
