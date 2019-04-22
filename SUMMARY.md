@@ -20,3 +20,12 @@
     * [内容片段](topics/snippets.md)
     * [使用`StreamField`特性的自由格式页面内容](topics/streamfield.md)
     * [权限问题](topics/permissions.md)
+
+* [高级话题](advanced_topics/index.md)
+
+    * [图片](advanced_topics/images/index.md)
+        * [以Python方式生成图片的转写](advanced_topics/images/renditions.md) 
+        * [动画GIF的支持](advanced_topics/images/animated_gifs.md)
+        * [对图片模型进行定制](advanced_topics/images/custom_image_model.md)
+        * [特性侦测](advanced_topics/images/feature_detection.md)
+        * [动态地提供图片的试图](advanced_topics/images/image_serve_view.md)

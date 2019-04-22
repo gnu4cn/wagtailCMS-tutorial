@@ -1,6 +1,6 @@
 # 高级话题
 
-+ 关于图片
++ [关于图片](advanced_topics/images.md)
 
     - 用Python生成图片的转写
     - 对动画GIF的支持
