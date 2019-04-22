@@ -16,3 +16,4 @@
     * [搜索功能](topics/search.md)
     * [内容片段](topics/snippets.md)
     * [使用`StreamField`特性的自由格式页面内容](topics/streamfield.md)
+    * [权限问题](topics/permissions.md)

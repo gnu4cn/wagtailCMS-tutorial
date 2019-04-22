@@ -46,7 +46,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - [搜索功能](topics/search.md)
     - [内容片段](topics/snippets.md)
     - [使用 StreamField 的自由格式页面内容](topics/streamfield.md)
-    - 页面访问权限
+    - [权限相关](topics/permissions.md)
 
 
 + 高级话题
