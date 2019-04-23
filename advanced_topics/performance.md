@@ -8,7 +8,7 @@ Wagtail开发者已经尽力将一个可以工作的Wagtail安装的外部依赖
 
 ### 缓存方面
 
-这里推荐使用[Redis](http://redis.io/)作为一个快速、持久的缓存。经由包管理器（在Debian或Ubuntu上：`sudo apt-get install redis-server`），并将`django-redis`添加到`requirements.txt`，且将其作为一个缓存后端进行开启：
+这里推荐使用 [Redis](http://redis.io/) 作为一个快速、持久的缓存。经由包管理器（在Debian或Ubuntu上：`sudo apt-get install redis-server`），并将`django-redis`添加到`requirements.txt`，且将其作为一个缓存后端进行开启：
 
 ```python
 CACHES = {
