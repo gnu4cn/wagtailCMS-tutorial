@@ -1,17 +1,17 @@
 # 高级话题
 
-+ [关于图片](advanced_topics/images.md)
++ [关于图片](images/index.md)
 
-    - 用Python生成图片的转写
-    - 对动画GIF的支持
-    - 对图片模型进行定制
-    - 特性侦测
-    - 动态的图片提供视图
+    - [用Python生成图片的转写](images/renditions.md)
+    - [对动画GIF的支持](images/animated_gifs.md)
+    - [对图片模型进行定制](images/custom_image_model.md)
+    - [特性侦测](images/feature_detection.md)
+    - [动态的图片提供视图](images/image_serve_view.md)
 
 
-+ 关于文档
++ [关于文档](documents/index.md)
 
-    - 对文档模型进行定制
+    - [对文档模型进行定制](documents/custom_document_model.md)
 
 
 + 嵌入的内容

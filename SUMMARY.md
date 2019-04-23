@@ -29,3 +29,5 @@
         * [对图片模型进行定制](advanced_topics/images/custom_image_model.md)
         * [特性侦测](advanced_topics/images/feature_detection.md)
         * [动态地提供图片的视图](advanced_topics/images/image_serve_view.md)
+    * [文档](advanced_topics/documents/index.md)
+        * [对文档模型进行定制](advanced_topics/docments/custom_document_model.md) 
