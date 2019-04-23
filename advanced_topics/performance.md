@@ -27,7 +27,7 @@ CACHES = {
 
 Wagtail有着对 [Elasticsearch](http://www.elasticsearch.org/)很强的支持 -- 同时对编辑器界面与站点用户来说 -- 但在没有 Elasticsearch时也可回滚到数据库搜索。比起Django用于文本搜索的ORM，Elasticsearch更为快速且更为强大，因此推荐安装Elasticsearch，或者使用一个像是 [Searchly](http://www.searchly.com/)这样的主机服务。
 
-更多有关配置Elasticsearch下的Wagtail的内容，请参见[Elasticsearch后端](topics/search/backends.md#wagtailsearch-backends-elasticsearch)。
+更多有关配置Elasticsearch下的Wagtail的内容，请参见[Elasticsearch后端](../topics/search/backends.md#wagtailsearch-backends-elasticsearch)。
 
 ### 数据库方面
 
