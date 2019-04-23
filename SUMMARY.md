@@ -31,3 +31,4 @@
         * [动态地提供图片的视图](advanced_topics/images/image_serve_view.md)
     * [文档](advanced_topics/documents/index.md)
         * [对文档模型进行定制](advanced_topics/docments/custom_document_model.md) 
+    * [关于嵌入内容](advanced_topics/embeds.md)

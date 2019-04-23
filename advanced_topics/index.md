@@ -14,10 +14,10 @@
     - [对文档模型进行定制](documents/custom_document_model.md)
 
 
-+ 嵌入的内容
++ [嵌入的内容](embeds.md)
 
-    - 在站点上嵌入内容
-    - 配置嵌入的 “查找器”（configuring embed "finders"）
+    - [在站点上嵌入内容](embeds.md#embedding-content-on-your-site)
+    - [配置嵌入的 “查找器”（configuring embed "finders"）](embeds.md#configuring-embed-finders)
 
 
 + 为Wagtail配置Django
