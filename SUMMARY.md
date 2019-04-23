@@ -28,4 +28,4 @@
         * [动画GIF的支持](advanced_topics/images/animated_gifs.md)
         * [对图片模型进行定制](advanced_topics/images/custom_image_model.md)
         * [特性侦测](advanced_topics/images/feature_detection.md)
-        * [动态地提供图片的试图](advanced_topics/images/image_serve_view.md)
+        * [动态地提供图片的视图](advanced_topics/images/image_serve_view.md)
