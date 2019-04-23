@@ -85,4 +85,62 @@ return render(request, 'display_image.html', {
     {% image_url page.photo "width-400" "mycustomview_serve" %}
 {% endraw %}
 
-可传递一个将用于经由其进行图片提供图片的可选视图名称。默认的视图名称为`wagtailimages_serve`。
+可传递一个将用于经由其提供图片的可选视图名称。默认的视图名称为`wagtailimages_serve`。
+
+## 高级配置
+
+### 令到视图重定向而非直接提供
+
+__Making the view redirect instead of serve__
+
+默认下该视图将直接提供图片文件。此行为可修改为一个`301`重定向，在图片留存于外部主机时，这样做会有用处。
+
+要开启重定向，就要在urls配置中，将`action='redirect'`传递给`ServeView.as_view()`方法：
+
+```python
+from wagtail.images.views.serve import ServeView
+
+urlpatterns = [
+    ...
+
+    url(r'^images/([^/*])/(\d*)/[^/*]/[^/]*$', ServeView.as_view(action='redirect'), name='wagtailimages_serve'),
+]
+```
+
+### 与`django-sendfile`的集成
+
+[`django-sendfile`](https://github.com/johnsensible/django-sendfile) 可将图片数据传输工作交给web服务器，而不是直接由Django应用直接提供图片数据。在站点有着很多同时被下载的图片，却又无法使用[带有缓存的代理服务器](performance.md#caching-proxy)或CDN的情况下，这样做可极大地减低服务器负载。
+
+首先要安装和配置好`django-sendfile`，并将web服务器配置好使用`django-sendfile`。如尚未准备好这些，请参考该[安装文档](https://github.com/johnsensible/django-sendfile#django-sendfile)。
+
+可使用`SenfFileView`类，来以`django-sendfile`方式进行图片的提供。此视图可开箱即用：
+
+```python
+from wagtail.images.views.serve import SendFileView
+
+urlpatterns = [
+    ...
+
+    url(r'^images/([^/]*)/(\d*)/([^/]*)/[^/]*$', SendFileView.as_view(), name='wagtailimages_serve'),
+]
+```
+
+可对其加以定制，以对`SENDFILE_BACKEND`中定义的后端进行覆写：
+
+```python
+from wagtail.images.views.serve import SendFileView
+from project.sendfile_backends import MyCustomBackend
+
+class MySendFileView(SendFileView):
+    backend = MyCustomBackend
+```
+
+还可将其定制为发送私有文件。比如在要求仅为需为认证用户（例如对于Django >= 1.9）：
+
+```python
+from django.contrib.auth.mixins import LoginRequiredMixin
+from wagtail.images.views.serve import SendFileView
+
+class PrivateSendFileView(LoginRequiredMixin, SendFileView):
+    raise_exception = True
+```
