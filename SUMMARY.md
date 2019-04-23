@@ -33,3 +33,4 @@
         * [对文档模型进行定制](advanced_topics/documents/custom_document_model.md) 
     * [关于嵌入内容](advanced_topics/embeds.md)
     * [Wagtail下对Django的配置](advanced_topics/settings.md)
+    * [部署Wagtail](advanced_topics/deploying.md)

@@ -29,7 +29,7 @@
     - [准备好使用示例配置文件](settings.md#complete-example-config)
 
 
-+ Wagtail的部署
++ [Wagtail的部署](deploying.md)
 
     - 在自己的服务器上部署
     - 在 Divio 云上部署
