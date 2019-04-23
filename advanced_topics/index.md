@@ -20,13 +20,13 @@
     - [配置嵌入的 “查找器”（configuring embed "finders"）](embeds.md#configuring-embed-finders)
 
 
-+ 为Wagtail配置Django
++ [为Wagtail配置Django](settings.md)
 
-    - 关于中间件（`settings.py`）
-    - 关于应用（`settings.py`）
-    - 关于设置变量（`settings.py`）
-    - URL的模式
-    - 准备好使用示例配置文件
+    - [关于中间件（`settings.py`）](settings.md#middleware)
+    - [关于应用（`settings.py`）](settings.md#apps)
+    - [关于设置变量（`settings.py`）](settings.md#settings-variables)
+    - [URL的模式](settings.md#url-patterns)
+    - [准备好使用示例配置文件](settings.md#complete-example-config)
 
 
 + Wagtail的部署

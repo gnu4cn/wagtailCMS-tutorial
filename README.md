@@ -57,7 +57,7 @@ Wagtail是一套以 Python 编写的、构建於 Django web框架之上的开放
     - [图片](advanced_topics/images/index.md)
     - [文档](advanced_topics/documents/index.md)
     - [嵌入的内容](advanced_topics/embeds.md)
-    - Wagtail下Django的配置
+    - [Wagtail下Django的配置](advanced_topics/settings.md)
     - Wagtail的部署
     - 性能问题
     - 国际化
