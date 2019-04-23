@@ -135,7 +135,7 @@ class MySendFileView(SendFileView):
     backend = MyCustomBackend
 ```
 
-还可将其定制为发送私有文件。比如在要求仅为需为认证用户（例如对于Django >= 1.9）：
+还可将其定制为发送私有文件。比如在要求仅为要求认证（例如对于Django >= 1.9）：
 
 ```python
 from django.contrib.auth.mixins import LoginRequiredMixin
