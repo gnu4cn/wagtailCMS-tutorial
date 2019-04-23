@@ -43,7 +43,7 @@ WAGTAILSEARCH_BACKENDS = {
 
 下面是Wagtail原生支持的后端清单。
 
-__数据库后端（默认支持）__
+### 数据库后端（默认支持
 
 `wagtail.search.backends.db`
 
@@ -57,7 +57,7 @@ __数据库后端（默认支持）__
 
 在上述任何一个特性都是重要的情况下，就要使用Elasticsearch了。
 
-__PostgreSQL 的后端__
+### PostgreSQL 的后端
 
 `wagtail.contrib.postgres_search.backend`
 
@@ -65,8 +65,8 @@ __PostgreSQL 的后端__
 
 请参阅[PostgreSQL的搜索引擎](reference/contrib.html#postgres-search)以了解更多知识。
 
-
-__Elasticsearch 后端__
+<a name="wagtailsearch-backends-elasticsearch"></a>
+### Elasticsearch 后端
 
 *Wagtail 2.1 的改动： 加入了对 Elasticsearch 6.x 的支持*
 
@@ -140,7 +140,7 @@ WAGTAILSEARCH_BACKENDS = {
 + 运行`./manage.py update_index`命令
 
 
-__Amazon AWS 的Elasticsearch__
+### Amazon AWS 的Elasticsearch
 
 Wagtail的Elasticsearch后端，是与[Amazon 的Elasticsearch服务](https://aws.amazon.com/elasticsearch-service/)兼容的，但需要额外配置，以处理基于IMA的认证。这可通过[requests-aws4auth](https://pypi.python.org/pypi/requests-aws4auth) `pip` 包，与以下的配置来完成：
 
@@ -167,7 +167,7 @@ WAGTAILSEARCH_BACKENDS = {
 }
 ```
 
-__构造自己的后端__
+### 构造自己的后端
 
 **Rolling Your Own**
 

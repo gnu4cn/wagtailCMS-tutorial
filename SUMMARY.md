@@ -34,3 +34,4 @@
     * [关于嵌入内容](advanced_topics/embeds.md)
     * [Wagtail下对Django的配置](advanced_topics/settings.md)
     * [部署Wagtail](advanced_topics/deploying.md)
+    * [性能问题](advanced_topics/performance.md)
