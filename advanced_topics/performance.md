@@ -25,7 +25,7 @@ CACHES = {
 
 ### 搜索方面
 
-Wagtail有着对 [Elasticsearch](http://www.elasticsearch.org/)很强的支持 -- 同时对编辑器界面与站点用户来说 -- 但在没有 Elasticsearch时也可回滚到数据库搜索。比起Django用于文本搜索的ORM，Elasticsearch更为快速且更为强大，因此推荐安装Elasticsearch，或者使用一个像是 [Searchly](http://www.searchly.com/)这样的主机服务。
+Wagtail有着对 [Elasticsearch](http://www.elasticsearch.org/)很强的支持 -- 同时对编辑器界面与站点用户来说 -- 但在没有 Elasticsearch时也可回滚到数据库搜索。比起Django用于文本搜索的ORM，Elasticsearch更为快速且更为强大，因此推荐安装Elasticsearch，或者使用一个像是 [Searchly](http://www.searchly.com/)这样的托管服务。
 
 更多有关配置Elasticsearch下的Wagtail的内容，请参见[Elasticsearch后端](../topics/search/backends.md#wagtailsearch-backends-elasticsearch)。
 
@@ -35,4 +35,29 @@ Wagtail在PostgreSQL、SQLite与MySQL上进行过测试。他也应工作在一�
 
 ## 模板方面
 
+读取与编译模板方面的压力可能叠加起来。在某些情形下可通过使用 [Django带有缓存的模板加载器](https://docs.djangoproject.com/en/stable/ref/templates/api/#django.template.loaders.cached.Loader)，而获取到显著的性能提升：
 
+```python
+TEMPLATES = [{
+    'BACKEND': 'django.template.backends.django.DjangoTemplates',
+    'DIR': [os.path.join(BASE_DIR, 'templates')],
+    'OPTIONS': {
+        'loaders': [
+            ('django.template.loaders.cached.Loader', [
+                'django.template.loaders.filesystem.Loader',
+                'django.template.loaders.app_directories.Loader',
+            ])
+        ]
+    }
+}]
+```
+
+但对使用此种加载器有一个注意事项。一旦模板被缓存起来，那么对模板文件的修改将不会生效。这就意味着 *不* 应在开发环境使用此加载器。
+
+## 对于公开用户
+
+### 缓存的代理服务器
+
+为了支持有着出色响应时间的海量流量，推荐使用某种缓存代理方案。在生产中已对 [Vanish](http://www.varnish-cache.org/) 与 [Squid](http://www.squid-cache.org/) 进行过测试。像是 [Cloudflare](https://www.cloudflare.com/)一类的托管代理也应可以工作。
+
+Wagtail有着Vanish/Squid上自动缓存失效的支持。请参阅[前端缓存无效化](reference/contrib/frontendcache.md#frontend-cache-purging)。

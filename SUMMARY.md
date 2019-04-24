@@ -35,3 +35,5 @@
     * [Wagtail下对Django的配置](advanced_topics/settings.md)
     * [部署Wagtail](advanced_topics/deploying.md)
     * [性能问题](advanced_topics/performance.md)
+    * [国际化问题](advanced_topics/i18n/index.md)
+        * [创建多语言站点（通过复制页面树的方式）](advanced_topics/i18n/duplicate_tree.md)
