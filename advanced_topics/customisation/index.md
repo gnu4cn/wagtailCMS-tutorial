@@ -1,13 +1,13 @@
 # 定制Wagtail
 
-+ 定制编辑界面
++ [定制编辑界面](page_editing_interface.md)
 
     - 对分页界面进行定制（the tabbed interface）
     - 关于富文本（HTML）
     - 对生成的表单进行定制
 
 
-+ 富文本的内部元素
++ [富文本的内部元素](rich_text_internals.md)
 
     - 关于富文本的数据格式
     - 特效注册表
