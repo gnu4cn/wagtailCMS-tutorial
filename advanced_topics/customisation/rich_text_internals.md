@@ -244,4 +244,26 @@ class CustomRichTextArea(widgets.TextArea):
 
 ## 关于格式转换器
 
+编辑器部件通常无法直接工作于Wagtail的富文本格式上，从而需要转换为其自己的原生格式。对于Draftail，原生格式为一种基于JSON的、叫做 `ContentState`（参见 [Draft.js是如何表示富文本数据的](https://medium.com/@rajaraodv/how-draft-js-represents-rich-text-data-eeabb5f25cf2)）的格式。Hallo.js与其他编辑器则是基于HTML 的`contentEditable`机制，此机制要求有效的HTML，因此Wagtail使用了一种被称为“编辑器HTML”的约定，在这种约定中，链接及嵌入元素所需要的额外数据，保存在`data-`属性中，比如：
 
+```html
+<a href="/contact-us" data-linktype="page", data-id="3">联系我们</a>
+```
+
+Wagtail提供了两个工具类，`wagtail.admin.rich_text.converters.contentstate.ContentstateConverter`与`wagtail.admin.rich_text.converters.editor_html.EditorHTMLConverter`，用于完成富文本格式与编辑器原生格式之间的转换。这些类是独立于各个编辑器部件的，且在将富文本渲染到模板上时，也是根据所发生的重写过程而有所区别。
+
+两个类都接受一个`features`清单，作为他们的构造器的参数，并实现以下两个方法：方法`from_database_format(data)`将Wagtail的富文本数据转换到编辑器的格式，方法`to_database_format(data)`，将编辑器数据转换到Wagtail的富文本格式。
+
+对于编辑器的插件，转换器类的行为可根据传递给他的功能清单，而有所不同。尤其是他可以执行白名单规则，来确保输出仅包含那些对应于当前活动功能集的HTML元素。功能注册表提供了`register_converter_rule`方法，来允许`register_rich_text_features`钩子，定义出在开启了给定功能时将要激活的转换规则。
+
+<a name="FeatureRegistry.register_converter_rule"></a>
++ `FeatureRegistry.register_converter_rule(converter_name, feature_name, rule_definition)`
+
+传递给`register_converter_plugin`的是一个转换器名称（对转换器类进行唯一标识的一个字符串 -- Wagtail使用了`contentstate`与`editorhtml`两个标识符）、一个功能标识符与一个规则定义对象。该对象是特定于转换器的，且可以是任意值。
+
+有关`contentstate`与`editorhtml`两个转换器的规则定义格式的详细信息，请分别参阅 [对Draftail编辑器进行扩展](extending_draftail.md) 与 [对Hallo编辑器进行扩展](extending_hallo.md)。
+
+<a name="FeatureRegistry.get_converter_rule"></a>
++ `FeatureRegistry.get_converter_rule(converter_name, feature_name)`
+
+在某个转换器类的内部，可通过`get_converter_rule`方法，获取到给定特性的规则定义，传递给该方法的参数为转换器自身的标识符字符串与功能标识符。在尚未注册匹配的规则时，该方法将返回`None`。

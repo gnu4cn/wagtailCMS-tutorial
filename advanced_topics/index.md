@@ -59,10 +59,10 @@
     - 为某种特定页面类型设置“需要口令”页面
 
 
-+ Wagtail的定制
++ [Wagtail的定制](customisation/index.md)
     
-    - 对编辑界面进行定制
-    - 富文本的内部内容
+    - [对编辑界面进行定制](customisation/page_editing_interface.md)
+    - [富文本内部](customisation/rich_text_internals.md)
     - 对Draftail编辑器进行扩展
     - 对Hallo编辑器进行扩展
     - 对管理界面模板进行定制
