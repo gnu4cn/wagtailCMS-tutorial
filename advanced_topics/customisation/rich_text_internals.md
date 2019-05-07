@@ -266,4 +266,4 @@ Wagtail提供了两个工具类，`wagtail.admin.rich_text.converters.contentsta
 <a name="FeatureRegistry.get_converter_rule"></a>
 + `FeatureRegistry.get_converter_rule(converter_name, feature_name)`
 
-在某个转换器类的内部，可通过`get_converter_rule`方法，获取到给定特性的规则定义，传递给该方法的参数为转换器自身的标识符字符串与功能标识符。在尚未注册匹配的规则时，该方法将返回`None`。
+在某个转换器类的内部，可通过`get_converter_rule`方法，获取到给定特性的规则定义，传递给该方法的参数为转换器自身的标识符字符串与功能标识符。在匹配的规则未有注册时，该方法将返回`None`。
