@@ -130,6 +130,20 @@ def register_help_text_feature(features):
 + API是非常底层的。因此有极大可能需要一些 Draft.js 的知识（the API is very __low-level__. You will most likely need some __Draftail.js knowledge__）。
 + 对富文本中的UIs进行定制非常艰难。要做好在不同浏览器中进行测试而花大量时间的准备（custom UIs in rich text can be brittle. Be ready to spend time __testing in multiple browsers__）。
 
-好消息时有了这样的底层API后，就令到第三方Wagtail插件可以在富文本功能上进行创新，带来新的体验种类。但与此同时，请考虑经由 `StreamField` 特性来实现UI，因为对于Django开发者来说，他有着经历了实战考验的API。
+好消息是有了这样的底层API后，就令到第三方Wagtail插件可以在富文本功能上进行创新，带来新的体验种类。但与此同时，请考虑经由 `StreamField` 特性来实现UI，因为对于Django开发者来说，他有着经历了实战考验的API。
 
+以下为创建新实体特性的一些主要要求：
 
++ 与内联样式及块一样，要注册一个编辑器插件。
++ 编辑器插件必须注册一个`source`：一个负责在编辑器中创建新实体实例的、使用Draft.js API 的React组件。
++ 编辑器插件还需要一个`decorator`（用于内联实体）或`block`（用于块实体）：一个负责在编辑器中显示出实体实例的React组件。
++ 与内联样式与块类似，要设置好到数据库及从数据的转换。
++ 该转换占了更大比重，因为实体包含了需要被序列化为HTML的数据。
+
+关于React组件的编写，Wagtail将其自带的React、Draft.js与Draftail的依赖，作为全局变量加以暴露。有关此方面的详细信息，请参阅 [对客户端组件进行扩展](amdin_templates.md#extending-clientside-components)。而更深入的讨论，则请移步 [Draftail文档](https://www.draftail.org/docs/formatting-options) 以及 [Draftail导出器文档](https://www.draftail.org/docs/formatting-options)。
+
+下面是一个详细示例，用来演示这些工具在Wagtail环境下的使用方式。为此示例目的，这里可设想某份金融报刊的新闻团队的情形。他们打算撰写有关股票市场的报道，在他们内容的任意位置对特定股票进行引用（比如在某个句子中引用 "$TSLA"），随后他们的报道中将自动完善该股票的信息（链接、数字、迷你图表等）。
+
+编辑器工具栏将包含一个显示了可选股票清单的“股票选择器”，最后将用户的选择作为一个文本式代币进行插入。比如下面将仅随机选取一支股票：
+
+![new-entity-in-draftail](images/draftail_entity_stock_source.gif)
