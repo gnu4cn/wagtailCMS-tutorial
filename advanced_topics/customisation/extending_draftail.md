@@ -147,3 +147,43 @@ def register_help_text_feature(features):
 编辑器工具栏将包含一个显示了可选股票清单的“股票选择器”，最后将用户的选择作为一个文本式代币进行插入。比如下面将仅随机选取一支股票：
 
 ![new-entity-in-draftail](images/draftail_entity_stock_source.gif)
+
+在发布时，这些代币将保存在富文本中。而在网站上该新闻报道被显示出来时，则将会把来自某个API的实时的市场数据，插入到各个代币旁边：
+
+![dratail-股票实体的渲染](images/draftail_entity_strock_rendering.png)
+
+为了实现此特性，就要像内联样式与块那样，首先对此富文本特性进行注册：
+
+```python
+@hooks.register('register_rich_text_features')
+def register_stock_feature(features):
+    features.default_features.append('stock')
+
+    """
+    对该 `stock` 功能进行注册，这里使用了 `STOCK` 的 Draft.js 实体类型，同时
+    是以一个 `<span data-stokc>`的标签，作为HTML进行存储的。
+    """
+
+    feature_name = 'stock'
+    type_ = 'STOKC'
+
+    control = {
+        'type': type_,
+        'lable': '$',
+        'description': '股票',
+    }
+
+    features.register_editor_plugin(
+        'draftail', feature_name, draftail_features.EntityFeature(
+            control,
+            js=['stock.js'],
+            css={'all': ['stock.css']}
+        )
+    )
+
+    features.register_converter_rule('contentstate', feature_name, {
+        # 这里请注意，数据库转换要比内联样式及块更为复杂。
+        'from_database_format': {'span[data-stock]': StockEntityElementHandler(type_)},
+        'to_database_format': {'entity_decorators': {type_, stock_entity_decorator}},
+    })
+```
