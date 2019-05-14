@@ -187,3 +187,144 @@ def register_stock_feature(features):
         'to_database_format': {'entity_decorators': {type_, stock_entity_decorator}},
     })
 ```
+
+`EntityFeature`上的 `js` 与 `css` 关键字，可用于指定额外的、于此功能出于活动状态时进行加载的JS与CSS文件。二者都是可选的。他们的值被添加到一个`Media`对象，有关这些对象的更多文档，在 [Django表单资源文档](https://docs.djangoproject.com/en/stable/topics/forms/media/) 中可以找到。
+
+因为实体保有数据，因此到数据库及从数据库的转换格式，就要更为复杂。这里就必须创建这两个转换处理器：
+
+```python
+from draftjs_exporter.dom import DOM
+from wagtail.admin.rich_text.converters.html_to_contentstate import InlineEntityElementHandler
+
+def stock_entity_decorator(props):
+    """
+    Draft.js 的 ContentState 格式到数据库的HTML。
+    将 STOCK 实体，转换为一个 span 标签。
+    """
+
+    return DOM.create_elment('span', {
+        'data-stock': props['stock'],
+    }, props['children'])
+
+
+class StockEntityElementHandler(InlineEntityElementHandler):
+    """
+    数据库的HTML到Draft.js的ContentState格式。
+    将该 span 标签，以正确的数据，转换为一个 STOCK 实体。
+    """
+
+    mutability = 'IMMUTABLE'
+
+    def get_attribute_data(self, attrs):
+        """
+        从 "data-stock" HTML属性取得 `'stock'` 的值。
+        """
+
+        return {
+            'stock': attrs['data-stock'],
+        }
+```
+
+注意这里他们是如何完成类似的转换，使用的却是不同的APIs. `to_database_format`是使用 [Draft.js 的导出器](https://github.com/springload/draftjs_exporter) 组件的 API 构建的，而 `from_database_format` 则使用了一个 Wagtail 的 API.
+
+下一步就是将 JavaScript 进行添加，来定义出创建实体的方式（也就是 `source`）与其显示的方式（`decorator`）。在 `stock.js` 中，定义了数据源组件：
+
+```javascript
+const React = window.React;
+const Modifier = window.DraftJS.Modifier;
+const EditorState = window.DraftJS.EditorState;
+
+const DEMO_STOCKS = ['AMD', 'AAPL', 'TWTR', 'TSLA', 'BTC'];
+
+// 这并非一个真正的 React 组件 -- 在实体被渲染时，尽可能快地创建出实体。
+class StockSorce extends React.Component {
+    componentDidMount() {
+        const { editorState, entityType, onComplete } = this.props;
+
+        const content = editorState.getCurrentContent();
+        const selection = editorState.getSelection();
+
+        const randomStock = DEMO_STOCKS[Math.floor(Math.random() * DEMO_STOCKS.length)];
+
+        // 使用 Draft.js 的API、以正确的数据来创建一个新的实体。
+        const contentWithEntity = content.createEntity(entityType.type, 'IMMUTABLE', {
+            stock: randomStock,
+        });
+        const entityKey = contentWithEntity.getLastCreatedEntityKey();
+
+        // 这里还要添加一些将要激活的实体的一些文本。
+        const text = `${randomStock}`;
+
+        const newContent = Modifier.replaceText(content, selection, text, null, entityKey);
+        const nextState = EditorState.push(editorState, newContent, 'insert-characters');
+
+        onComplete(nextState);
+    }
+
+    render() {
+        return null;
+    }
+}
+```
+
+此源数据组件，使用了由 [Draftail](https://www.draftail.org/docs/api) 所提供的数据与回调。其还使用了来自全局变量的依赖 -- 请参阅 [对客户端组件进行扩展](admin_templates.md#extending-clientside-components)。
+
+随后创建出装饰器组件：
+
+```javascript
+const Stock = (props) => {
+    const { entityKey, contentState } = props;
+    const data = contentState.getEntity(entityKey).getData();
+
+    return React.createElement('a', {
+        role: 'button',
+        onMouseUp: () => {
+            window.open(`https://finance.yahoo.com/quote/${data.stock}`);
+        },
+    }, props.children);
+};
+```
+
+这是一直白的 React 组件了。其并未使用 JSX, 因为这里不打算非得要为这些JavaScript代码而使用一个构建步骤。其使用了 ES6 的语法 -- 在Internet Explorer 11 中无法运行，除非使用一个构建步骤转换到 ES5 的语法。
+
+最后将这些 JS组件注册到插件：
+
+```javascript
+window.draftail.registerPlugin({
+    type: 'STOCK',
+    source: StockSource,
+    decorator: Stock,
+});
+```
+
+就是这样了！该项设置的所有代码，将在站点前端上最终生成以下的HTML：
+
+```html
+<p>
+    Anyone following Elon Mask's <span data-stock="TSLA">$TSLA</span> should also look into <span data-stock="BTC">$BTC</span>.
+</p>
+```
+
+为了最终完成该示例，这里可将一点 JavaScript 代码加入到前端，从而给这些代币装饰上一些链接与迷你图表：
+
+```javascript
+[].slice.call(document.querySelectionAll('data-stock')).forEach((elt) => {
+    const link = document.createElement('a');
+    link.ref = `https://finance.yahoo.com/quote${elt.dataset.stock}`;
+    link.innerHTML = `${elt.innerHTML}<svg width="50" height="20" stroke-width="2" stoke="blue" fill="rgba(0, 0, 255, .2)"><path d="M4 14.19 L 4 14.19 L 13.2 14.21 L 22.4 13.77 L 31.59 13.99 L 40.8 13.46 L 50 11.68 L 59.19 11.35 L 68.39 10.68 L 77.6 7.11 L 86.8 7.85 L 96 4" fill="none"></path><path d="M4 14.19 L 4 14.19 L 13.2 14.21 L 22.4 13.77 L 31.59 13.99 L 40.8 13.46 L 50 11.68 L 59.19 11.35 L 68.39 10.68 L 77.6 7.11 L 86.8 7.85 L 96 4 V 20 L 4 20 Z" stroke="none"></path></svg>`;
+    
+    elt.innerHTML = '';
+    elt.appendChild(link);
+});
+```
+
+也可以创建定制块（请参阅单独的 [Draftail 文档](https://www.draftail.org/docs/blocks)），但关于定制块的创建，这里不再赘述，因为在 Wagtail 中， [StreamField](https://wagtail.xfoss.com/topics/streamfield.html#streamfield) 是创建块级别富文本的最佳方式。
+
+<a name="integration-of-the-draftail-widgets"></a>
+## Draftail小部件的集成
+
+为更进一步对 Draftail 小部件集成到UI的方式加以定制，有着以下的 CSS与JS的额外扩展点：
+
++ 在 JavaScript中，使用 `[data-draftail-input]` 属性选择器，来选定带有数据的输入，并使用对封装了编辑器的元素，使用 `[data-draftail-editor-wrapper]` 属性（in JavaScript, use the `[data-dratail-input]` attributes selector to target the input which contains the data, and `[data-dratail-editor-wrapper]` for the element which wraps the editor）。
++ 编辑器实例是绑定在某个必将访问的输入字段上的。使用`document.querySelector('[data-draftail-input]').draftailEditor`（the editor instance is bound on the input field for imperative access. Use `document.querySelector('[data-draftail-input]').draftailEditor`）。
++ 在 CSS中，使用以`Draftail-`作为前缀的类（in CSS, use the classes prefixed with `Draftail-`）。
