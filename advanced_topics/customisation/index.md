@@ -18,7 +18,7 @@
     - 格式转换器
 
 
-+ 对Draftail编辑器进行扩展
++ [对Draftail编辑器进行扩展](extending_draftail.md)
 
     - 创建新的内联样式
     - 创建新的块
