@@ -72,7 +72,7 @@
 + [第三方教程](third_party_tutorials.md)
 
 
-+ Jinja2模板的支持
++ [Jinja2模板的支持](jinja2.md)
 
     - 对Django进行配置
     - 模板中的`self`
