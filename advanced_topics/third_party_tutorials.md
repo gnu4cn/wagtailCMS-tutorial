@@ -12,4 +12,4 @@
 + [从Wagtail 1.0 升级到 Wagtail 1.1](https://www.caktusgroup.com/blog/2017/07/19/upgrading-wagtail/) （2017年7月19）
 + [Wagtail的多语种：一个用于演示如何实现多语种的简单项目](https://github.com/cristovao-alves/Wagtail-Multilingual) （2017年1月31日）
 
-......
+[更多请参阅](http://docs.wagtail.io/en/v2.5.1/advanced_topics/third_party_tutorials.html)
