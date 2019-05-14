@@ -45,3 +45,4 @@
         * [对Hallo编辑器的扩展](advanced_topics/customisation/extending_hallo.md) 
         * [管理模板的定制](advanced_topics/customisation/admin_templates.md) 
         * [对用户模型进行定制](advanced_topics/customisation/custom_user_models.md) 
+    * [第三方教程](advanced_topics/third_party_tutorials.md)

@@ -69,7 +69,7 @@
     - 对用户模型进行定制
 
 
-+ 第三方教程
++ [第三方教程](third_party_tutorials.md)
 
 
 + Jinja2模板的支持
