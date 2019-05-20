@@ -47,3 +47,4 @@
         * [对用户模型进行定制](advanced_topics/customisation/custom_user_models.md) 
     * [第三方教程](advanced_topics/third_party_tutorials.md)
     * [Jinja2模板的支持](advanced_topics/jinja2.md)
+    * [对 Wagtail 站点进行测试](advanced_topics/testing.md)
