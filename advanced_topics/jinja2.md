@@ -90,8 +90,10 @@ Jinja 的模板，必须放在应用的 `jinja2/` 目录中。比如`events` 应
 
 请参考 [Wagtail的用户栏](https://wagtail.xfoss.com/writing_templates.md#wagtailuserbar-tag) 以获取更多信息。
 
+{% raw %}
 
-+ <code>{% include_block %}</code>
+    {% include_block %}
+{% endraw %}
 
 将流式内容（the stream content）作为一个整体，输出他的HTML表示，对于各个单独块也是作为整体输出为HTML表示的。
 
