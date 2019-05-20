@@ -79,14 +79,14 @@
     - 模板的标签、函数与过滤器
 
 
-+ 对Wagtail站点进行测试
++ [对Wagtail站点进行测试](testing.md)
 
     - WagtailPageTests
     - 表单数据助手
     - Fixtures
 
 
-+ Wagtail编程接口
++ [Wagtail编程接口](api/index.md)
 
-    - Wagtail API 第二版 配置手册
-    - Wagtail API 第二版使用手册
+    - [Wagtail API 第二版 配置手册](api/configuration.md)
+    - [Wagtail API 第二版使用手册](api/usage.md)
