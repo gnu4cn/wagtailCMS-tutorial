@@ -115,4 +115,4 @@ Jinja 的模板，必须放在应用的 `jinja2/` 目录中。比如`events` 应
        {% include_block %}
 {% endraw %}
 
-> 标签设计用于严格遵循 Jinja 的 `{% include %}` 标签的语法与行为，因此其并没有实现 Django 版本的仅传递指定变量到上下文中的特性。
+> 标签设计用于严格遵循 Jinja 的 `include` 标签的语法与行为，因此其并没有实现 Django 版本的仅传递指定变量到上下文中的特性。
